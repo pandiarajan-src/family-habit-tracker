@@ -76,8 +76,46 @@ def end_session(db: Session, response: Response, row: DeviceSession) -> None:
     response.delete_cookie(CSRF_COOKIE, path="/")
 
 
+# Every 401 names what the client must ask for in `WWW-Authenticate` (spec §4): the family
+# passcode (no session, or it ended) or the member's PIN (wrong PIN). The status alone can't
+# tell them apart: PATCH /sessions/current returns both.
+PASSCODE_CHALLENGE = "FamilyPasscode"
+PIN_CHALLENGE = "MemberPIN"
+
+
 def _unauthorized(detail: str = "Unlock with the family passcode") -> HTTPException:
-    return HTTPException(status.HTTP_401_UNAUTHORIZED, detail=detail)
+    return HTTPException(
+        status.HTTP_401_UNAUTHORIZED,
+        detail=detail,
+        headers={"WWW-Authenticate": PASSCODE_CHALLENGE},
+    )
+
+
+def wrong_passcode() -> HTTPException:
+    return _unauthorized("Wrong passcode")
+
+
+def wrong_pin() -> HTTPException:
+    return HTTPException(
+        status.HTTP_401_UNAUTHORIZED,
+        detail="Wrong PIN",
+        headers={"WWW-Authenticate": PIN_CHALLENGE},
+    )
+
+
+def unauthorized_doc(description: str, *challenges: str) -> dict:
+    """OpenAPI entry for a 401, documenting which challenges it can carry."""
+    return {
+        "description": description,
+        "headers": {
+            "WWW-Authenticate": {
+                "description": (
+                    f"`{PASSCODE_CHALLENGE}`: unlock again; `{PIN_CHALLENGE}`: wrong PIN"
+                ),
+                "schema": {"type": "string", "enum": list(challenges)},
+            }
+        },
+    }
 
 
 def _is_person_initiated(request: Request) -> bool:

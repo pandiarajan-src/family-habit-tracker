@@ -5,7 +5,13 @@ import logging
 from fastapi import APIRouter
 
 from app.schemas.family import FamilyRead, FamilyUpdate
-from app.security.sessions import Db, FamilyAuth, ParentAuth
+from app.security.sessions import (
+    PASSCODE_CHALLENGE,
+    Db,
+    FamilyAuth,
+    ParentAuth,
+    unauthorized_doc,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +22,7 @@ router = APIRouter(prefix="/families", tags=["families"])
     "/current",
     response_model=FamilyRead,
     summary="Get the signed-in family",
-    responses={401: {"description": "No family session"}},
+    responses={401: unauthorized_doc("No family session", PASSCODE_CHALLENGE)},
 )
 def read_family(auth: FamilyAuth) -> FamilyRead:
     return FamilyRead(id=auth.family.id, timezone=auth.family.timezone)
@@ -27,7 +33,7 @@ def read_family(auth: FamilyAuth) -> FamilyRead:
     response_model=FamilyRead,
     summary="Change the family timezone (parents only)",
     responses={
-        401: {"description": "No family session"},
+        401: unauthorized_doc("No family session", PASSCODE_CHALLENGE),
         403: {"description": "Missing CSRF token, no acting member, or not a parent"},
     },
 )

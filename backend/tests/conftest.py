@@ -2,12 +2,14 @@ from collections.abc import Callable, Iterator
 from contextlib import ExitStack
 
 import pytest
+from argon2 import PasswordHasher, profiles
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.config import Settings
 from app.main import create_app
+from app.security import hashing
 from tests.support import (
     FAMILY_TZ,
     NOW,
@@ -20,6 +22,16 @@ from tests.support import (
     act_as,
     unlock,
 )
+
+
+@pytest.fixture(autouse=True)
+def _cheap_password_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Real argon2 costs ~50 ms per hash and dominated the suite's run time.
+
+    Behaviour is the same (argon2id, salted); only the cost drops. The production
+    parameters are checked in tests/unit/test_hashing.py.
+    """
+    monkeypatch.setattr(hashing, "_hasher", PasswordHasher.from_parameters(profiles.CHEAPEST))
 
 
 @pytest.fixture

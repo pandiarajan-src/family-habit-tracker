@@ -228,6 +228,8 @@ export interface operations {
             /** @description Wrong passcode */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -271,6 +273,8 @@ export interface operations {
             /** @description No family session, or it ended after 5 idle minutes */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -296,6 +300,8 @@ export interface operations {
             /** @description No family session, or it ended after 5 idle minutes */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -331,9 +337,11 @@ export interface operations {
                     "application/json": components["schemas"]["SessionRead"];
                 };
             };
-            /** @description No family session, or wrong PIN */
+            /** @description Session missing or ended (`FamilyPasscode`), or wrong PIN (`MemberPIN`) */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode" | "MemberPIN";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -391,6 +399,8 @@ export interface operations {
             /** @description No family session */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -422,6 +432,8 @@ export interface operations {
             /** @description No family session */
             401: {
                 headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
                     [name: string]: unknown;
                 };
                 content?: never;

@@ -12,6 +12,8 @@ from app.schemas.session import SessionCreate, SessionRead, SessionUpdate
 from app.security.hashing import verify_secret
 from app.security.pin_lockout import is_locked, record_failure, record_success
 from app.security.sessions import (
+    PASSCODE_CHALLENGE,
+    PIN_CHALLENGE,
     ClockDep,
     Db,
     FamilyAuth,
@@ -19,13 +21,16 @@ from app.security.sessions import (
     end_session,
     get_owned_or_404,
     start_session,
+    unauthorized_doc,
+    wrong_passcode,
+    wrong_pin,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
-_401 = {"description": "No family session, or it ended after 5 idle minutes"}
+_401 = unauthorized_doc("No family session, or it ended after 5 idle minutes", PASSCODE_CHALLENGE)
 _403 = {"description": "Missing CSRF token, or the acting member isn't allowed"}
 
 
@@ -43,7 +48,7 @@ def _session_read(row: DeviceSession, family: Family, acting: Member | None) -> 
     status_code=status.HTTP_201_CREATED,
     summary="Sign this device in with the family passcode",
     responses={
-        401: {"description": "Wrong passcode"},
+        401: unauthorized_doc("Wrong passcode", PASSCODE_CHALLENGE),
         429: {"description": "Too many wrong passcodes from this client; wait 15 minutes"},
     },
 )
@@ -68,7 +73,7 @@ def create_session(
     if family is None:
         limiter.record_failure(client, now)
         logger.info("passcode attempt rejected")
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Wrong passcode")
+        raise wrong_passcode()
 
     row = start_session(db, response, request, family)
     logger.info("session started family_id=%s", family.id)
@@ -90,7 +95,11 @@ def read_session(auth: FamilyAuth) -> SessionRead:
     response_model=SessionRead,
     summary="Choose who's checking in (with their PIN), or switch person",
     responses={
-        401: {"description": "No family session, or wrong PIN"},
+        401: unauthorized_doc(
+            "Session missing or ended (`FamilyPasscode`), or wrong PIN (`MemberPIN`)",
+            PASSCODE_CHALLENGE,
+            PIN_CHALLENGE,
+        ),
         403: _403,
         404: {"description": "Member not found in this family"},
         429: {"description": "Too many wrong PINs for this member; ask a parent or wait 5 min"},
@@ -122,7 +131,7 @@ def update_session(body: SessionUpdate, auth: FamilyAuth, db: Db, clock: ClockDe
             db.add(credential)
             db.commit()
         logger.info("pin attempt rejected member_id=%s", member.id)
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Wrong PIN")
+        raise wrong_pin()
 
     record_success(credential)
     row.acting_member_id = member.id

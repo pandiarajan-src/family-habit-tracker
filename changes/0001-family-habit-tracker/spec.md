@@ -39,7 +39,7 @@ Terms used below:
 **User story:** As a family member on a shared device, I want to pick myself and enter my own short PIN, so that nobody else can check off habits or spend gems as me.
 **Acceptance criteria:**
 - Given a family session with no acting member, when a person taps their avatar on the Family board and enters their correct 4-digit PIN, then they become the acting member and see My day.
-- Given a wrong PIN, when it is entered, then the API returns `401`, the PIN pad clears, and the screen says "Not quite — have another go".
+- Given a wrong PIN, when it is entered, then the API returns `401` with `WWW-Authenticate: MemberPIN`, the PIN pad clears, and the screen says "Not quite — have another go" (C18).
 - Given 5 consecutive wrong PINs for one member, when a sixth is tried within 5 minutes, then the API returns `429` and the PIN pad tells the person to ask a parent or wait 5 minutes. The lockout affects only that member.
 - Given a family session with no acting member, when any write endpoint is called, then the API returns `403`. Read endpoints (family view) still work [child-data-privacy #3].
 - Given any PIN attempt, when it is logged, then the log line contains the member ID only: no nickname and no PIN [child-data-privacy #2].
@@ -48,7 +48,7 @@ Terms used below:
 **User story:** As a family member sharing a tablet, I want the app to sign me out when I'm done or have stopped using it, so that the next person can't act as me and an unattended device doesn't stay signed in.
 **Acceptance criteria:**
 - Given an acting member, when they tap "Done — switch person", then the acting member is cleared and the Family board is shown.
-- Given an acting member and no user interaction for 5 minutes, when the timeout passes, then the acting member is cleared on the server and the next write returns `403`.
+- Given an acting member and no user interaction for 5 minutes, when the timeout passes, then the acting member is cleared on the server. Because the family session idles out at the same moment (next criterion), the next request, read or write, returns `401` and the device shows Passcode entry. While the family session is still active and nobody is acting (for example after "Done — switch person"), a write returns `403` (REQ-003, REQ-028) (C17).
 - Given a family session and no user interaction for 5 minutes, when the timeout passes, then the family session ends on the server, the next data request returns `401`, and the device shows Passcode entry with "You were signed out to keep things safe. Unlock to carry on!" [family-ux #6]. A device never stays signed in for more than 5 inactive minutes.
 - Given a screen that refreshes in the background (REQ-012), when it fetches data, then that fetch does not count as activity and does not extend either timeout. Only requests triggered by a person (a tap, a click, a key press, navigation) count.
 - Given two devices in the same family, when different members are acting on each at the same time, then each device's writes are attributed to its own acting member.
@@ -403,11 +403,13 @@ All routes are under `/api/v1` with plural resource nouns [api-conventions #1]. 
 
 **Auth column:** *none* = exempt (passcode entry only [child-data-privacy #3]); *family* = family session required, else `401`; *member* = family session + acting member, else `403`; *parent* = acting member must be a parent. "Self/parent-of-child" means the acting member owns the resource or is a parent and the owner is a child. Every route except `POST /sessions` can return `401`; every route with an ID can return `404` (also for another family's IDs, REQ-028).
 
+**Which `401`:** every `401` carries a `WWW-Authenticate` challenge so the client knows what to ask for (C18). `FamilyPasscode`: no session, it ended, or the passcode was wrong; the client shows Passcode entry. `MemberPIN`: the session is fine but a PIN was wrong (`PATCH /sessions/current`, and a wrong `current_pin` on `PUT /members/{member_id}/credentials`); the client stays on the PIN pad or My PIN. The status code alone can't tell these apart, because `PATCH /sessions/current` returns both.
+
 | Method | Path | Request | Response | Status codes | Auth · REQs |
 |---|---|---|---|---|---|
 | POST | /api/v1/sessions | SessionCreate {passcode} | SessionRead {family_id, acting_member: MemberRead?, expires_at}; sets cookie | 201, 401, 422, 429 | none · REQ-001 |
 | GET | /api/v1/sessions/current | — | SessionRead | 200, 401 | family · REQ-001, 003, 004 |
-| PATCH | /api/v1/sessions/current | SessionUpdate {acting_member_id: UUID\|null, pin?} | SessionRead | 200, 401, 404, 422, 429 | family · REQ-003, 004 |
+| PATCH | /api/v1/sessions/current | SessionUpdate {acting_member_id: UUID\|null, pin?} | SessionRead | 200, 401 (`FamilyPasscode` or `MemberPIN`), 403 (CSRF), 404, 422, 429 | family · REQ-003, 004 |
 | DELETE | /api/v1/sessions/current | — | empty | 204, 401, 403 | parent · REQ-002 |
 | GET | /api/v1/families/current | — | FamilyRead {id, timezone} | 200, 401 | family · REQ-027 |
 | PATCH | /api/v1/families/current | FamilyUpdate {timezone} | FamilyRead | 200, 401, 403, 422 | parent · REQ-027 |
@@ -525,8 +527,8 @@ Every endpoint gets a pytest API test with a success case and at least one failu
 |---|---|---|---|
 | REQ-001 | Passcode hash verify; rate limiter windowing | Correct → 201 + cookie; wrong → 401; 11th attempt → 429, even with the correct passcode; every data route without cookie → 401; captured logs contain no passcode | Unlock with passcode; wrong passcode shows kind error |
 | REQ-002 | — (no logic beyond session delete) | Parent DELETE → 204, replayed cookie → 401; child → 403 | Parent signs device out, lands on Passcode entry |
-| REQ-003 | PIN lockout counter | Correct PIN → acting member set; wrong → 401; 6th → 429; with member A locked out, member B's correct PIN still works; write with no acting member → 403; logs have IDs only | Tap avatar, type PIN on keypad by keyboard and touch |
-| REQ-004 | Idle-timeout calculation for acting member and family session; background requests ignored | After simulated 5 min idle: write → 403 and read → 401; background-refresh requests don't extend expiry; a person-initiated request at 4 min does | "Done — switch person" returns to board; after 5 idle minutes (simulated clock) the device shows Passcode entry with kind copy; two browser contexts act as different members |
+| REQ-003 | PIN lockout counter | Correct PIN → acting member set; wrong → 401 with `WWW-Authenticate: MemberPIN`; 6th → 429; with member A locked out, member B's correct PIN still works; write with no acting member → 403; logs have IDs only | Tap avatar, type PIN on keypad by keyboard and touch |
+| REQ-004 | Idle-timeout calculation for acting member and family session; background requests ignored | After simulated 5 min idle: read and write → 401 (`FamilyPasscode`), including a PIN entry; a write after "Done — switch person" → 403; background-refresh requests don't extend expiry; a person-initiated request at 4 min does | "Done — switch person" returns to board; after 5 idle minutes (simulated clock) the device shows Passcode entry with kind copy; two browser contexts act as different members |
 | REQ-005 | PIN format validation; current-PIN check feeds lockout counter | Self set with correct current PIN → 204; missing current PIN → 422; wrong current PIN → 401, 5th wrong → 429; parent resets child without current PIN → 204 + adjustment; child sets other → 403; "12a4" → 422 | Change own PIN on My PIN; mismatched confirmation shows kind message and sends nothing; parent resets child PIN, child unlocks with new PIN |
 | REQ-006 | Nickname/emoji validation | Create → 201; extra `birthdate` field → 422; duplicate nickname → 422; member edits own nickname/avatar → 200; child changes role → 403; demote last parent → 422 | Parent adds a child member |
 | REQ-007 | — (enforced by DB cascade) | Delete member → 204; their check-ins, habits, savers, transactions, claims, credential, adjustments all gone (API and DB query); actor columns null; unknown ID → 404; remove last parent → 422 and nothing deleted | Parent removes member after confirmation |
@@ -587,6 +589,11 @@ Non-functional (section 6):
 - **C11 — Backups.** **Decision:** no database backups in this version (section 6, section 10).
 - **C8 — Intent status.** **Accepted:** the author confirmed the intent is accepted; committing the status change is not a blocker for the spec.
 - **C4 — Phone vs. tablet** (informational, no decision needed). [family-ux] says "often on a phone"; the family uses tablets and laptops. The 360–1440px rule [family-ux #1] covers both.
+
+### Found during Phase 1 — resolved by the author (2026-10-20)
+
+- **C17 — REQ-004 idle write status.** The acting member and the family session share one 5-minute idle timer, so when the acting member times out the session has ended too, and the earlier "next write returns `403`" could not happen. **Decision:** after 5 idle minutes every request returns `401`; `403` stays the answer for a write with no acting member while the session is still active (e.g. after "Done — switch person"). REQ-004 and §7 updated.
+- **C18 — Telling a wrong PIN from an ended session.** Both are `401` on `PATCH /sessions/current`, and the client must react differently (stay on the PIN pad vs. go to Passcode entry). **Decision:** each `401` carries `WWW-Authenticate: FamilyPasscode` or `MemberPIN` (§4 "Which `401`"). REQ-003 and REQ-005 statuses are unchanged.
 
 ### Design vs. spec — resolved by the author (2026-10-20)
 
