@@ -1,0 +1,7 @@
+# Default owner for everything
+* @pandiarajan-src
+
+# agent configuration = reviewed like code
+/.claude/            @pandiarajan-src
+/.github/workflows/  @pandiarajan-src
+/CLAUDE.md           @pandiarajan-src

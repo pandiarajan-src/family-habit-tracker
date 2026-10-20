@@ -1,0 +1,36 @@
+name: "💡 Feature idea"
+description: Suggest something new. Once triaged, this issue becomes an `intent.md` in `changes/NNNN-slug/`.
+labels: ["type:feature", "stage:intent"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Focus on the problem and the outcome, not the solution.
+        Once it's triaged, this issue becomes an `intent.md` (see `changes/README.md`).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What can't you do today?
+      description: Describe the problem or gap. Concrete examples help.
+    validations:
+      required: true
+  - type: textarea
+    id: affected
+    attributes:
+      label: Who is affected?
+      description: Which family members, roles or parts of the system?
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would better look like?
+      description: Describe the outcome you want, and how you'd know it's working.
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Anything this should explicitly not cover.
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Any constraints?
+      description: Deadlines, privacy, accessibility, devices, dependencies, etc.
