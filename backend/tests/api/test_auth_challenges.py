@@ -74,3 +74,25 @@ def test_req_003_openapi_documents_both_challenges_on_pin_entry(client: TestClie
 
     header = operation["responses"]["401"]["headers"]["WWW-Authenticate"]
     assert set(header["schema"]["enum"]) == {ASK_PASSCODE, ASK_PIN}
+
+
+@pytest.mark.req("REQ-003")
+def test_req_003_member_without_a_pin_record_cannot_be_chosen(
+    unlocked: TestClient, family: SeededFamily, settings
+) -> None:
+    from sqlmodel import Session
+
+    from app.db import make_engine
+    from app.models import MemberCredential
+
+    engine = make_engine(settings.database_url)
+    with Session(engine) as db:
+        db.delete(db.get_one(MemberCredential, family["Kavi"].id))
+        db.commit()
+    engine.dispose()
+
+    response = act_as(unlocked, family["Kavi"])
+
+    assert response.status_code == 401
+    assert _challenge(response) == ASK_PIN
+    assert unlocked.get(SESSION).json()["acting_member"] is None

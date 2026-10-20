@@ -141,9 +141,8 @@ def require_family(request: Request, db: Db, clock: ClockDep) -> Auth:
     db.commit()
     db.refresh(row)
 
-    family = db.get(Family, row.family_id)
-    if family is None:  # cascades remove sessions with their family; defensive only
-        raise _unauthorized()
+    # A session can't outlive its family: the FK cascades deletes.
+    family = db.get_one(Family, row.family_id)
     acting = db.get(Member, row.acting_member_id) if row.acting_member_id else None
     return Auth(session=row, family=family, acting_member=acting)
 

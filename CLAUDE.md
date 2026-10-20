@@ -21,11 +21,11 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make be-dev` / `fe-dev` | one server only, same ports |
 | `make build` | `frontend/dist/` written, no tsc errors |
 | `make lint` | see `verify` below (ruff, eslint, prettier, tsc) |
-| `make be-lint` | `All checks passed!` · `50 files already formatted`; also greps for `now()`/`today()` outside `app/clock.py` |
+| `make be-lint` | `All checks passed!` · `53 files already formatted`; also greps for `now()`/`today()` outside `app/clock.py` |
 | `make fe-lint` | eslint silent · `All matched files use Prettier code style!` · tsc silent |
 | `make fmt` | files rewritten, exits 0 |
 | `make test` | `test-backend` then `test-frontend` |
-| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `6 passed` |
+| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `112 passed in ~2s` |
 | `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
 | `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
 | `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
@@ -39,12 +39,12 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 `make verify` (lint + all tests + security; must pass before a PR) ends like this:
 ```
 cd backend && APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
-......                                                                   [100%]
-Name              Stmts   Miss Branch BrPart  Cover   Missing
--------------------------------------------------------------
-TOTAL                32      0      2      0   100%
-Required test coverage of 95% reached. Total coverage: 100.00%
-6 passed in 0.03s
+........................................................................ [ 64%]
+........................................                                 [100%]
+…
+TOTAL                             587      1     86      4    99%
+Required test coverage of 95% reached. Total coverage: 99.26%
+112 passed in 1.90s
 cd frontend && npx vitest run --coverage
  Test Files  1 passed (1)
       Tests  5 passed (5)

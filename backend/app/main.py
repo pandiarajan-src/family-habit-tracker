@@ -1,5 +1,7 @@
 """FastAPI application factory."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import Literal
 
@@ -35,6 +37,13 @@ def read_health() -> HealthRead:
     return HealthRead(status="ok")
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    yield
+    # Close pooled SQLite connections on shutdown (and after each test app).
+    app.state.engine.dispose()
+
+
 def create_app(settings: Settings | None = None, clock: Clock | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     # Swagger UI/ReDoc pull assets from a CDN, so they're off in prod [child-data-privacy #5].
@@ -44,6 +53,7 @@ def create_app(settings: Settings | None = None, clock: Clock | None = None) -> 
         version="0.1.0",
         docs_url="/docs" if docs else None,
         redoc_url="/redoc" if docs else None,
+        lifespan=_lifespan,
     )
     app.state.settings = settings
     app.state.clock = clock or SystemClock()

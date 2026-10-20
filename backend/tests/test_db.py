@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import Engine
+from sqlalchemy.exc import StatementError
 from sqlmodel import Session, select
 
 from app.config import Settings
@@ -107,3 +108,12 @@ def test_nfr_transaction_refuses_to_nest_inside_an_open_transaction(engine: Engi
         db.get(Family, uuid4())  # opens a transaction
         with pytest.raises(RuntimeError, match="new transaction"), transaction(db):
             pass
+
+
+def test_nfr_naive_datetimes_are_refused_at_the_database(engine: Engine) -> None:
+    naive = NOW.replace(tzinfo=None)
+
+    with Session(engine) as db:
+        db.add(Family(timezone="Europe/London", passcode_hash="x", created_at=naive))
+        with pytest.raises(StatementError, match="naive datetimes"):
+            db.flush()
