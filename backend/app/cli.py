@@ -75,10 +75,12 @@ def setup_family(settings: Settings, timezone: str) -> None:
     if not 1 <= len(nickname) <= 20:
         sys.exit("A nickname is 1-20 characters.")
     avatar = input("Their avatar emoji: ").strip()
+    # Hints are literals: nothing printed here is built from a secret or secret-named value
+    # (CodeQL py/clear-text-logging-sensitive-data). test_cli checks the "6" matches the rule.
     passcode = _ask_secret(
         "Family passcode",
         lambda v: len(v) >= MIN_PASSCODE_LENGTH,
-        f"Use at least {MIN_PASSCODE_LENGTH} characters.",
+        "Use at least 6 characters.",
     )
     pin = _ask_secret("Their 4-digit PIN", PIN_PATTERN.match, "A PIN is exactly 4 numbers.")
 

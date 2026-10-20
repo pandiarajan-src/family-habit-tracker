@@ -99,6 +99,9 @@ def test_cli_setup_family_stores_only_hashes_and_never_prints_secrets(
     assert credential is not None and verify_secret(credential.pin_hash, "2468")
     out = capsys.readouterr().out
     assert f"Family created: {family.id}" in out
+    # The hints shown for the rejected tries describe the real rules.
+    assert f"Use at least {cli.MIN_PASSCODE_LENGTH} characters." in out
+    assert "A PIN is exactly 4 numbers." in out
     assert "owl-sunflower-26" not in out
     assert "2468" not in out
 
