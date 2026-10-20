@@ -91,15 +91,15 @@ These apply to every phase. They are fixed here so phases don't re-decide them.
 No DB and no FastAPI. Inputs are plain dataclasses (dates of check-ins, saved periods, target history, today).
 
 **Files that change**
-- `backend/app/domain/dates.py`: family date, ISO week Monday, a week range.
-- `backend/app/domain/weekly_targets.py`: target in effect for a given week (REQ-009).
-- `backend/app/domain/streaks.py`: daily and weekly current/best streak, today-pending rule, week completion.
-- `backend/app/domain/gems.py`: daily earn events (1 per habit-day; +5 when n mod 7 = 5, +7 when n mod 7 = 0) and weekly earn events (1 per complete week; +5 every 5 weeks). Returns *dated events*, which are also used for the REQ-021 history.
-- `backend/app/domain/savers.py`: saveable periods (past only, ≤ 7 days, must follow a done/saved period; for weekly habits, the most recent past week below target) and the rising cost within a run.
-- `backend/app/domain/balance.py`: available = earned + transactions, a write-off amount when negative, and the held amount.
-- `backend/app/domain/permissions.py`: the matrix from REQ-028 (actor role, owner role, self, action → allowed).
-- `backend/app/domain/day_states.py`: Done / Saved / Not yet; week state Complete / Saved / In progress x of N / Coming up (REQ-023, C13).
-- `backend/tests/unit/test_*.py` for each module.
+- `backend/app/domain/dates.py`: family date, ISO week Monday, a week range. *As built:* `clock.family_today` now calls `dates.family_date`, so the timezone conversion lives in one place.
+- `backend/app/domain/weekly_targets.py`: target in effect for a given week (REQ-009). *As built:* also `change_target()` (a new target counts from this week; a second change in the same week replaces the first) and 1–7 / Monday validation on `TargetChange`.
+- `backend/app/domain/streaks.py`: daily and weekly current/best streak, today-pending rule, week completion. *As built:* one period timeline (`DONE`/`SAVED`/`OPEN`/`PENDING`) split into runs, which gems and savers reuse so all three agree. Inputs are `DailyHistory` / `WeeklyHistory` (dates and Mondays only, no titles). Archive freezes the streak (pass the archive date as `today`); unarchive restarts it (`restart_on`, C20).
+- `backend/app/domain/gems.py`: daily earn events (1 per habit-day; +5 when n mod 7 = 5, +7 when n mod 7 = 0) and weekly earn events (1 per complete week; +5 every 5 weeks). Returns *dated events*, which are also used for the REQ-021 history. *As built:* `EarnKind` has the five derived kinds from the Phase 8 note (`daily_checkin`, `daily_bonus_5`, `daily_bonus_7`, `weekly_goal`, `weekly_bonus_5`); a week's events are dated on the check-in day that reached its target.
+- `backend/app/domain/savers.py`: saveable periods (past only, ≤ 7 days, must follow a done/saved period; for weekly habits, the most recent past week below target) and the rising cost within a run. *As built:* a weekly saver also needs the week before it complete or saved (the "same rule, per week" of spec §8 Q3); a saver that joins two runs costs 1 + the savers in both (C21).
+- `backend/app/domain/balance.py`: available = earned + transactions, a write-off amount when negative, and the held amount. *As built:* plus `can_afford()` and `gems_to_go()` ("12 more gems to go!").
+- `backend/app/domain/permissions.py`: the matrix from REQ-028 (actor role, owner role, self, action → allowed). *As built:* `Role` moved here and `app/models/member.py` imports it, so there is one definition. Check-ins outside today/yesterday are a separate `CHECK_IN_CORRECTION` action (parent → child only), so Phase 3 can tell `403` (not allowed) from `422` (own habit, outside the window). `CLAIM_DECIDE` takes the family's parent count (REQ-026).
+- `backend/app/domain/day_states.py`: Done / Saved / Not yet; week state Complete / Saved / In progress x of N / Coming up (REQ-023, C13). *As built:* days after today or before `created_on` have no state (blank, as in the Month view mockup); a past week below target is `below_target` (C19); a complete week shows as complete even if it was saved (C21).
+- `backend/tests/unit/test_*.py` for each module. *As built:* shared dates in `tests/unit/domain_support.py`; `test_domain_purity.py` fails if a domain module imports the DB, FastAPI, SQLModel, the clock or `logging`.
 
 **Order of work:** dates → weekly targets → streaks → gems → savers → balance → permissions → day states.
 
@@ -112,6 +112,7 @@ No DB and no FastAPI. Inputs are plain dataclasses (dates of check-ins, saved pe
 - REQ-021 / REQ-014: balance never below 0; write-off amount; earning after a write-off → 1.
 - REQ-023: day-state mapping; weekly never per-day "Saved"; today never "Saved".
 - REQ-028: the permission-matrix table.
+- *As built:* also REQ-009 (target in effect per week; archive freezes, unarchive restarts) and REQ-025 (affordability, gems to go). New ambiguities went to spec §9 as C19–C21 with the default the engine uses.
 
 **Risks:** rule ambiguity at edges (for example a saver after a saved day, or a target change mid-run). Mitigation: table-driven tests that quote the spec line, and any new ambiguity goes back to the spec as a question instead of being guessed. Performance: recomputation is O(habits × days), about 4 × 20 × 400. That's trivial, so no caching.
 

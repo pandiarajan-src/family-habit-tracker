@@ -606,6 +606,12 @@ Non-functional (section 6):
 
 - **C16 — Sample data in the History mockups breaks the streak-saver rule.** In the updated History and Month view mockups, every "Saved" day comes straight after a "Not yet" day (e.g. Dad · Exercise: Sat Not yet, Sun Saved; Mia · Reading: 7 Oct Not yet, 8 Oct Saved). REQ-020 allows a saver only on a day that directly follows a done or saved day, so these runs would already have ended. This affects only the illustrative data, not the layout or the spec. Options: (a) leave it, and note that E2E fixtures must follow REQ-020 rather than copy the mockup data (recommended); (b) ask Claude Design to move each "Saved" so it follows a "Done" day.
 
+### Found during Phase 2 — open (minor; the domain engine uses the default shown)
+
+- **C19 — A past weekly-habit week that ended below target.** REQ-023 names week states for complete, saved and the current week, but not for a past week below target with no saver. Default: the engine returns `below_target` with its count (e.g. 1 of 3), and the UI shows it with an encouraging label (to be written in Phase 6 under [family-ux #6]), never "missed".
+- **C20 — What "unarchiving starts it again from today" means for the run.** Default: no run carries over into the unarchive day (or, for a weekly habit, that week), so the streak restarts from it and a saver can't cover a day on or before it. Archiving freezes the streak at the archive date. Phase 3 needs to store the last unarchive date (e.g. `Habit.active_since`) to feed this.
+- **C21 — A saver that joins two runs, and a saved week later completed.** Default: a saver that fills the gap between two runs costs 1 + the savers already in both runs, because afterwards they are one unbroken run (REQ-020). If a parent correction later completes a saved week, the week counts as complete (it earns its gem) and the saver's gems stay spent ("no refunds", section 10).
+
 ## 10. Out of scope
 
 - Reminders, notifications, email or push messages (intent).

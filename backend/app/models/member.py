@@ -1,16 +1,11 @@
 from datetime import datetime
-from enum import StrEnum
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 from sqlmodel import Field, SQLModel
 
 from app.db import UTCDateTime
-
-
-class Role(StrEnum):
-    parent = "parent"
-    child = "child"
+from app.domain.permissions import Role
 
 
 class Member(SQLModel, table=True):
