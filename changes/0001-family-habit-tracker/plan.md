@@ -71,7 +71,7 @@ These apply to every phase. They are fixed here so phases don't re-decide them.
 - REQ-001: correct passcode → 201 + cookie flags; wrong → 401; 11th attempt → 429 even with the right passcode; no cookie on every data route → 401 (a parametrised test over `app.routes`); captured logs contain no passcode.
 - REQ-002: parent DELETE → 204, replayed cookie → 401; child → 403.
 - REQ-003: correct PIN sets the acting member; wrong → 401; 6th → 429 for member A only (member B still works); a write with no acting member → 403; logs show IDs only.
-- REQ-004: with the clock advanced 5 min, a write → 403 (acting member cleared) and a read → 401 (session ended). Background-refresh requests don't extend expiry; a person-initiated request at 4 min does. Two clients act as different members.
+- REQ-004: with the clock advanced past 5 idle min, reads and writes → 401. The acting member and the family session share one 5-minute idle timer, so the session has always ended too, and REQ-028 makes a missing session 401. Spec REQ-004's "next write returns 403" can't be reached; flagged for spec clarification. Background-refresh requests don't extend expiry; a person-initiated request at 4 min does. Two clients act as different members.
 - REQ-027: GET/PATCH timezone; a bad IANA name → 422; datetimes carry the family offset; unit tests for family dates across DST and midnight.
 - REQ-028 (scaffold): an other-family ID → 404 helper (`get_owned_or_404`); a permission-matrix unit table.
 - NFR: CSP and HSTS headers present; cookie `HttpOnly; SameSite=Lax` (+`Secure` under prod settings); a missing CSRF token → 403.
