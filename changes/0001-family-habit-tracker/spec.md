@@ -1,6 +1,6 @@
 # Spec: Family habit tracker
 
-Change: `0001-family-habit-tracker` · Intent: [intent.md](intent.md) · Status: draft
+Change: `0001-family-habit-tracker` · Intent: [intent.md](intent.md) · Status: Approved · Date: 2026-10-20
 
 ## 1. Summary
 
