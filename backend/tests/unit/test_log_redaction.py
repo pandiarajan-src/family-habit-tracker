@@ -32,6 +32,14 @@ def test_privacy_records_without_access_args_pass_untouched() -> None:
     assert record.getMessage() == "plain x"
 
 
+def test_privacy_access_args_without_a_string_path_pass_untouched() -> None:
+    record = _access_record("/api/v1/health")
+    record.args = ("127.0.0.1:5000", "GET", None, "1.1", 200)
+
+    assert StripQueryFilter().filter(record)
+    assert record.args == ("127.0.0.1:5000", "GET", None, "1.1", 200)
+
+
 def test_privacy_install_keeps_sqlalchemy_quiet_and_adds_the_filter_once() -> None:
     install_log_redaction("DEBUG")
     install_log_redaction("DEBUG")

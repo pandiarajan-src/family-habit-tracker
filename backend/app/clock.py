@@ -2,7 +2,8 @@
 
 from datetime import UTC, date, datetime, timedelta
 from typing import Protocol
-from zoneinfo import ZoneInfo
+
+from app.domain.dates import family_date
 
 
 class Clock(Protocol):
@@ -33,4 +34,4 @@ class FrozenClock:
 
 def family_today(clock: Clock, timezone: str) -> date:
     """Today's date in the family's timezone (REQ-027)."""
-    return clock.now().astimezone(ZoneInfo(timezone)).date()
+    return family_date(clock.now(), timezone)
