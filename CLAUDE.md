@@ -10,59 +10,23 @@ Family Habit Tracker: households set shared and personal habits, check them off 
 - Tests: pytest (backend), Vitest + Testing Library (frontend), Playwright E2E in `e2e/` (from Phase 10).
 
 ## Commands
-Run from the repo root. `make` loads `.env` (created from `.env.example` by `make setup`).
+Run from the repo root. `make` loads `.env` (created from `.env.example` by `make setup`). `make help` lists every target.
 
-| Target | Healthy output |
+| Target | What it does |
 |---|---|
-| `make help` | list of targets with descriptions |
-| `make check-tools` | `uv 0.13.1 · node v26.12.0 · npm 11.20.0` |
-| `make setup` | `✅ SETUP DONE` |
-| `make dev` | API on http://localhost:8000 (`/docs`), app on http://localhost:5173; Ctrl-C stops both |
-| `make be-dev` / `fe-dev` | one server only, same ports |
-| `make build` | `frontend/dist/` written, no tsc errors |
-| `make lint` | see `verify` below (ruff, eslint, prettier, tsc) |
-| `make be-lint` | `All checks passed!` · `53 files already formatted`; also greps for `now()`/`today()` outside `app/clock.py` |
-| `make fe-lint` | eslint silent · `All matched files use Prettier code style!` · tsc silent |
-| `make fmt` | files rewritten, exits 0 |
-| `make test` | `test-backend` then `test-frontend` |
-| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `112 passed in ~2s` |
-| `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
-| `make test-hooks` | `.claude/hooks/tests/run.sh` feeds fake tool calls to each hook: `✅ hook tests: 31 passed` |
-| `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
-| `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
-| `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
-| `make e2e` | `e2e: no Playwright tests yet (Phase 10).` |
-| `make migrate` | Alembic upgrade to head on `DATABASE_URL` (also run by `make be-dev`) |
-| `make seed-dev` | `seed-dev: sample family created …` (Dad/Mum/Mia/Kavi; passcode and PINs in `app/cli.py`) |
-| `make setup-family` | prompts for passcode + first parent; prints `Family created: <id>` |
-| `make clean` | `rm -rf frontend/dist frontend/coverage backend/.pytest_cache …` |
+| `make setup` | install backend and frontend deps from the lock files; ends `✅ SETUP DONE` |
+| `make dev` | API on http://localhost:8000 (`/docs`) + app on http://localhost:5173; `be-dev` / `fe-dev` run one |
+| `make fmt` | auto-fix lint issues and format all code |
+| `make lint` | ruff, eslint, prettier, tsc, no changes made; `be-lint` also fails on `now()`/`today()` outside `app/clock.py` |
+| `make be-test` / `fe-test` | one side's tests with its coverage gate; lists only files with missing lines |
+| `make coverage` | full coverage tables for both sides |
+| `make api-types` | regenerate `frontend/src/api/schema.d.ts` from the backend OpenAPI |
+| `make migrate` | Alembic upgrade to head on `DATABASE_URL` (`be-dev` runs it too) |
+| `make seed-dev` | sample family Dad/Mum/Mia/Kavi (passcode and PINs in `app/cli.py`) |
+| `make verify` | lint + build + hook tests + all tests + security; ends `✅ VERIFY PASSED`, on failure read the first error |
 
-`make verify` (lint + all tests + security; gates PR creation via a hook, see Definition of done) ends like this:
-```
-cd backend && APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
-........................................................................ [ 64%]
-........................................                                 [100%]
-…
-TOTAL                             587      1     86      4    99%
-Required test coverage of 95% reached. Total coverage: 99.26%
-112 passed in 1.90s
-cd frontend && npx vitest run --coverage
- Test Files  1 passed (1)
-      Tests  5 passed (5)
-=============================== Coverage summary ===============================
-Statements   : 100% ( 17/17 )
-Branches     : 100% ( 6/6 )
-Functions    : 100% ( 5/5 )
-Lines        : 100% ( 14/14 )
-================================================================================
-cd backend && uv audit
-Found no known vulnerabilities and no adverse project statuses in 74 packages
-cd backend && uv run bandit -r app -q
-cd frontend && npm audit --omit=dev
-found 0 vulnerabilities
-
-✅ VERIFY PASSED
-```
+`make verify` runs the hook tests (`make test-hooks`) only when `.claude/hooks`, `.claude/settings.json`,
+the lock files or the lint config differ from `origin/main`.
 
 Single test:
 - `cd backend && APP_ENV=test uv run pytest tests/test_health.py::test_name` (or `-k keyword`, `-m req`)
@@ -77,7 +41,8 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - Spec: testable REQ-NNN requirements with Given/When/Then, via `intent-to-spec`.
 - Plan: files, ordered tasks, tests, risks, written to `plan.md` (not plan-mode approval).
 - Code: PRs reference the change folder; each plan phase ends green and can be its own PR.
-- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–1 done.
+- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–1 done
+  (update this line when a phase merges).
   Read the plan's "Cross-cutting technical decisions" table before coding; don't re-decide them.
 - Shipped changes get a row in `docs/metrics/scoreboard.md`.
 
@@ -90,6 +55,8 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - API types come from `src/api/schema.d.ts`, never hand-written. User-facing strings live in `src/copy.ts`.
 - Select elements in tests by role/label, never CSS classes.
 - Don't add dependencies without asking.
+- `.claude/hooks/**` and `.claude/settings.json` are read-only for Claude (settings `deny`):
+  propose the change and let the user apply it.
 
 ## Architecture
 - `backend/app/{models,routers,services}` — tables, HTTP routes, business logic.
@@ -99,17 +66,17 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - `docs/design/` = mockups (`docs/design/mvp/`: HTML plus PNGs per screen at 360/768/1440).
 
 ## Definition of done
-- Every plan phase or bug fix that changes code adds unit tests for that change, then runs
-  `make build` and `make verify`; both must pass.
-- Unit-test coverage must be at least 95% backend and 90% frontend (lines/functions/branches), enforced by
-  `make test`. If it is lower, add unit tests and rerun `make build` and `make verify` until both pass.
+- Every plan phase or bug fix that changes code adds unit tests for that change.
+- Coverage gates: backend 95%, frontend 90% lines/functions/branches. If lower, add tests; never lower a threshold.
+- If a test fails, fix the code, not the test.
+- While iterating, run the narrowest check: a single test, `be-test`/`fe-test`, `be-lint`/`fe-lint`.
+- Run `make verify` **once**, after the last edit, and paste its last ~10 lines before saying a task is complete.
+  Don't rerun it before `git commit` or `gh pr create` when no file changed since it passed.
+- PR gate (`.claude/hooks/pre-pr-gate.py`): `gh pr create`/`gh pr ready` goes through if `make verify` already
+  passed for the same file contents (committed or not); otherwise it runs `make verify` and blocks on failure.
+  When blocked, fix the cause; never edit the hook or a threshold to get through.
 - A real security false positive gets `# nosec B<id>: <reason>` on that line and is mentioned in the PR.
   Never silence a finding without a reason.
-- PR creation is gated by a `PreToolUse` hook (`.claude/hooks/pre-pr-gate.py`): `gh pr create`/`gh pr ready`
-  runs `make verify` (lint, coverage gates, 0 vulnerabilities) and is blocked if it fails. When blocked,
-  fix the cause; never lower a threshold or edit the hook to get through.
-- Run `make verify` and paste the output before saying a task is complete.
-- If a test fails, fix the code, not the test.
 - Update `plan.md` in the same commit if the implementation diverged.
 
 ## Tests
@@ -124,7 +91,7 @@ Unit (frontend)
 
 E2E
 - Playwright at the repo root (`package.json`, `playwright.config.ts`, specs in `e2e/`), added in Phase 10.
-- `make e2e` is a placeholder until then; afterwards it joins `make verify`.
+  Until then `make e2e` is a placeholder; afterwards it joins `make verify`.
 - Selectors follow `family-ux`: role/label only.
 
 Requirements

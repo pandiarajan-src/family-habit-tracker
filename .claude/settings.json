@@ -11,6 +11,7 @@
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(gh pr view*)",
+      "Bash(gh pr create*)",
       "Bash(gh issue view*)",
       "Read(./.env.example)"
     ],
@@ -30,6 +31,7 @@
         "hooks": [
           {
             "type": "command",
+            "if": "Bash(gh pr *)",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-pr-gate.py",
             "timeout": 600
           },
