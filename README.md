@@ -13,10 +13,15 @@ See [`changes/README.md`](changes/README.md) for the full process and how to sta
 You need [uv](https://docs.astral.sh/uv/) (it installs Python 3.14.7 from `.python-version`), Node 26 (`frontend/.nvmrc`) and `make`.
 
 ```sh
-make setup    # install backend + frontend deps from the lock files; creates .env from .env.example
-make dev      # API on http://localhost:8000 (docs at /docs), app on http://localhost:5173
-make verify   # lint + type-check + all tests; prints ✅ VERIFY PASSED
+make setup     # install backend + frontend deps from the lock files; creates .env from .env.example
+make seed-dev  # create the database and a sample family (Dad, Mum, Mia, Kavi)
+make dev       # API on http://localhost:8000 (docs at /docs), app on http://localhost:5173
+make verify    # lint + type-check + all tests; prints ✅ VERIFY PASSED
 ```
+
+`make dev` applies database migrations first (`make migrate` runs them on their own).
+The sample family's passcode and PINs are in `backend/app/cli.py` (dev only; `seed-dev` refuses `APP_ENV=prod`).
+For a real family, run `make setup-family` instead: it asks for the passcode and the first parent's PIN without showing them (set `FAMILY_TZ`, default `Europe/London`).
 
 Other targets: `make help`. Settings are environment variables; see [`.env.example`](.env.example).
 After changing a backend route or schema, run `make api-types` and commit `frontend/src/api/schema.d.ts` (CI checks it's up to date).

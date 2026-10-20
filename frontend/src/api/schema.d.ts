@@ -21,10 +21,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign this device in with the family passcode */
+        post: operations["create_session_api_v1_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get this device's session and acting member */
+        get: operations["read_session_api_v1_sessions_current_get"];
+        put?: never;
+        post?: never;
+        /** Sign this device out of the family (parents only) */
+        delete: operations["delete_session_api_v1_sessions_current_delete"];
+        options?: never;
+        head?: never;
+        /** Choose who's checking in (with their PIN), or switch person */
+        patch: operations["update_session_api_v1_sessions_current_patch"];
+        trace?: never;
+    };
+    "/api/v1/families/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the signed-in family */
+        get: operations["read_family_api_v1_families_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the family timezone (parents only) */
+        patch: operations["update_family_api_v1_families_current_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** FamilyRead */
+        FamilyRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Timezone */
+            timezone: string;
+        };
+        /** FamilyUpdate */
+        FamilyUpdate: {
+            /** Timezone */
+            timezone: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** HealthRead */
         HealthRead: {
             /**
@@ -32,6 +106,73 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /**
+         * MemberRead
+         * @description The only member fields the API returns [child-data-privacy #1]; never credential fields.
+         */
+        MemberRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nickname */
+            nickname: string;
+            /** Avatar Emoji */
+            avatar_emoji: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "parent" | "child";
+            /** Gem Balance */
+            gem_balance: number;
+            /** Gems Held */
+            gems_held: number;
+        };
+        /** SessionCreate */
+        SessionCreate: {
+            /** Passcode */
+            passcode: string;
+        };
+        /** SessionRead */
+        SessionRead: {
+            /**
+             * Family Id
+             * Format: uuid
+             */
+            family_id: string;
+            acting_member: components["schemas"]["MemberRead"] | null;
+            /**
+             * Expires At
+             * Format: date-time
+             * @description In the family's timezone (ISO-8601 with offset)
+             */
+            expires_at: string;
+        };
+        /**
+         * SessionUpdate
+         * @description Choose who's checking in (with their PIN), or `acting_member_id: null` to switch person.
+         */
+        SessionUpdate: {
+            /** Acting Member Id */
+            acting_member_id: string | null;
+            /** Pin */
+            pin?: string | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -58,6 +199,259 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthRead"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRead"];
+                };
+            };
+            /** @description Wrong passcode */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many wrong passcodes from this client; wait 15 minutes */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    read_session_api_v1_sessions_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_session_api_v1_sessions_current_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, or the acting member isn't allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_session_api_v1_sessions_current_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRead"];
+                };
+            };
+            /** @description Session missing or ended (`FamilyPasscode`), or wrong PIN (`MemberPIN`) */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode" | "MemberPIN";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, or the acting member isn't allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Member not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many wrong PINs for this member; ask a parent or wait 5 min */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    read_family_api_v1_families_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyRead"];
+                };
+            };
+            /** @description No family session */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_family_api_v1_families_current_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FamilyUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyRead"];
+                };
+            };
+            /** @description No family session */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not a parent */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -21,28 +21,30 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make be-dev` / `fe-dev` | one server only, same ports |
 | `make build` | `frontend/dist/` written, no tsc errors |
 | `make lint` | see `verify` below (ruff, eslint, prettier, tsc) |
-| `make be-lint` | `All checks passed!` · `7 files already formatted` |
+| `make be-lint` | `All checks passed!` · `53 files already formatted`; also greps for `now()`/`today()` outside `app/clock.py` |
 | `make fe-lint` | eslint silent · `All matched files use Prettier code style!` · tsc silent |
 | `make fmt` | files rewritten, exits 0 |
 | `make test` | `test-backend` then `test-frontend` |
-| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `6 passed` |
+| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `112 passed in ~2s` |
 | `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
 | `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
 | `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
 | `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
 | `make e2e` | `e2e: no Playwright tests yet (Phase 10).` |
-| `make seed-dev` | `seed-dev: nothing to seed yet (Phase 1 adds the data model).` |
+| `make migrate` | Alembic upgrade to head on `DATABASE_URL` (also run by `make be-dev`) |
+| `make seed-dev` | `seed-dev: sample family created …` (Dad/Mum/Mia/Kavi; passcode and PINs in `app/cli.py`) |
+| `make setup-family` | prompts for passcode + first parent; prints `Family created: <id>` |
 | `make clean` | `rm -rf frontend/dist frontend/coverage backend/.pytest_cache …` |
 
 `make verify` (lint + all tests + security; must pass before a PR) ends like this:
 ```
 cd backend && APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
-......                                                                   [100%]
-Name              Stmts   Miss Branch BrPart  Cover   Missing
--------------------------------------------------------------
-TOTAL                32      0      2      0   100%
-Required test coverage of 95% reached. Total coverage: 100.00%
-6 passed in 0.03s
+........................................................................ [ 64%]
+........................................                                 [100%]
+…
+TOTAL                             587      1     86      4    99%
+Required test coverage of 95% reached. Total coverage: 99.26%
+112 passed in 1.90s
 cd frontend && npx vitest run --coverage
  Test Files  1 passed (1)
       Tests  5 passed (5)
@@ -74,7 +76,7 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - Spec: testable REQ-NNN requirements with Given/When/Then, via `intent-to-spec`.
 - Plan: files, ordered tasks, tests, risks, written to `plan.md` (not plan-mode approval).
 - Code: PRs reference the change folder; each plan phase ends green and can be its own PR.
-- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phase 0 done.
+- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–1 done.
   Read the plan's "Cross-cutting technical decisions" table before coding; don't re-decide them.
 - Shipped changes get a row in `docs/metrics/scoreboard.md`.
 
