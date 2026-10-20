@@ -7,3 +7,16 @@ Family Habit Tracker is a web app for households to build habits together. Famil
 Every change follows the same pipeline: **intent → spec → plan → code**. A human writes the intent; the spec, plan and code follow from it, each reviewed before the next begins. Each change lives in its own folder under `changes/NNNN-slug/`, and shipped changes are tracked on the [scoreboard](docs/metrics/scoreboard.md).
 
 See [`changes/README.md`](changes/README.md) for the full process and how to start a change.
+
+## Run locally
+
+You need [uv](https://docs.astral.sh/uv/) (it installs Python 3.14.7 from `.python-version`), Node 26 (`frontend/.nvmrc`) and `make`.
+
+```sh
+make setup    # install backend + frontend deps from the lock files; creates .env from .env.example
+make dev      # API on http://localhost:8000 (docs at /docs), app on http://localhost:5173
+make verify   # lint + type-check + all tests; prints ✅ VERIFY PASSED
+```
+
+Other targets: `make help`. Settings are environment variables; see [`.env.example`](.env.example).
+After changing a backend route or schema, run `make api-types` and commit `frontend/src/api/schema.d.ts` (CI checks it's up to date).

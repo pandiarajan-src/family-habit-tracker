@@ -1,0 +1,9 @@
+:root {
+  --font-body: 'Nunito', system-ui, sans-serif;
+  --color-bg: #fffaf3;
+  --color-text: #2b2118;
+  --color-focus: #1f5fbf;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --target-min: 44px;
+}

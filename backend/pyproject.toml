@@ -1,0 +1,33 @@
+[project]
+name = "family-habit-tracker-backend"
+version = "0.1.0"
+description = "Family Habit Tracker API"
+authors = [
+    { name = "Pandiarajan", email = "pandi.rajan@icloud.com" }
+]
+requires-python = ">=3.14.7,<3.15"
+dependencies = [
+    "alembic>=1.20.0",
+    "argon2-cffi>=25.1.0",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.151.0",
+    "sqlmodel>=0.0.48",
+    "tzdata>=2026.5",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.1",
+    "time-machine>=3.5.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = ["req(id): links a test to a spec requirement, e.g. REQ-011"]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
