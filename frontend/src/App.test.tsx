@@ -34,4 +34,25 @@ describe('App', () => {
 
     expect(await screen.findByText(/not reachable yet/)).toBeInTheDocument()
   })
+
+  it('shows a kind message when the API answers with a status other than ok', async () => {
+    mockFetch(Promise.resolve(Response.json({ status: 'degraded' })))
+
+    render(<App />)
+
+    expect(await screen.findByText(/not reachable yet/)).toBeInTheDocument()
+  })
+
+  it('aborts the health check and ignores its result after unmounting', async () => {
+    let resolve: (response: Response) => void = () => {}
+    const fetchMock = mockFetch(new Promise<Response>((r) => (resolve = r)))
+
+    const { unmount } = render(<App />)
+    unmount()
+    resolve(Response.json({ status: 'ok' }))
+
+    const { signal } = fetchMock.mock.calls[0][1] as RequestInit
+    expect(signal?.aborted).toBe(true)
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+  })
 })

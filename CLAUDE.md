@@ -25,23 +25,38 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make fe-lint` | eslint silent · `All matched files use Prettier code style!` · tsc silent |
 | `make fmt` | files rewritten, exits 0 |
 | `make test` | `test-backend` then `test-frontend` |
-| `make test-backend` (`be-test`) | `6 passed in 0.02s` |
-| `make test-frontend` (`fe-test`) | `Test Files  1 passed (1)` · `Tests  3 passed (3)` |
+| `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `6 passed` |
+| `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
 | `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
+| `make security` | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
 | `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
 | `make e2e` | `e2e: no Playwright tests yet (Phase 10).` |
 | `make seed-dev` | `seed-dev: nothing to seed yet (Phase 1 adds the data model).` |
 | `make clean` | `rm -rf frontend/dist frontend/coverage backend/.pytest_cache …` |
 
-`make verify` (lint + all tests; must pass before a PR) ends like this:
+`make verify` (lint + all tests + security; must pass before a PR) ends like this:
 ```
-cd backend && APP_ENV=test uv run pytest
-tests/test_config.py ...                                                 [ 50%]
-tests/test_health.py ...                                                 [100%]
-============================== 6 passed in 0.02s ===============================
-cd frontend && npm test
+cd backend && APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
+......                                                                   [100%]
+Name              Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------
+TOTAL                32      0      2      0   100%
+Required test coverage of 95% reached. Total coverage: 100.00%
+6 passed in 0.03s
+cd frontend && npx vitest run --coverage
  Test Files  1 passed (1)
-      Tests  3 passed (3)
+      Tests  5 passed (5)
+=============================== Coverage summary ===============================
+Statements   : 100% ( 17/17 )
+Branches     : 100% ( 6/6 )
+Functions    : 100% ( 5/5 )
+Lines        : 100% ( 14/14 )
+================================================================================
+cd backend && uv audit
+Found no known vulnerabilities and no adverse project statuses in 74 packages
+cd backend && uv run bandit -r app -q
+cd frontend && npm audit --audit-level=high --omit=dev
+found 0 vulnerabilities
 
 ✅ VERIFY PASSED
 ```
@@ -81,6 +96,12 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - `docs/design/` = mockups (`docs/design/mvp/`: HTML plus PNGs per screen at 360/768/1440).
 
 ## Definition of done
+- Every plan phase or bug fix that changes code adds unit tests for that change, then runs
+  `make build` and `make verify`; both must pass.
+- Then run `make coverage`: unit-test coverage must be at least 98% (backend and frontend). If it is lower,
+  add unit tests and rerun `make build`, `make verify` and `make coverage` until it is back to 98% or higher.
+- `make security` is clean. A real false positive gets `# nosec B<id>: <reason>` on that line and is mentioned
+  in the PR. Never silence a finding without a reason.
 - Run `make verify` and paste the output before saying a task is complete.
 - If a test fails, fix the code, not the test.
 - Update `plan.md` in the same commit if the implementation diverged.
