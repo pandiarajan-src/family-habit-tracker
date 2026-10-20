@@ -28,7 +28,7 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `6 passed` |
 | `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
 | `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
-| `make security` | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
+| `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
 | `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
 | `make e2e` | `e2e: no Playwright tests yet (Phase 10).` |
 | `make seed-dev` | `seed-dev: nothing to seed yet (Phase 1 adds the data model).` |

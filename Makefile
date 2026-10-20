@@ -22,7 +22,7 @@ FE := cd frontend &&
 .PHONY: help setup check-tools dev be-dev fe-dev build \
         lint be-lint fe-lint fmt \
         test test-backend test-frontend be-test fe-test coverage \
-        security api-types e2e seed-dev verify clean
+        security be-security fe-security api-types e2e seed-dev verify clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -92,9 +92,13 @@ coverage: ## Run all tests with coverage reports
 	$(BE) APP_ENV=test uv run pytest --cov --cov-report=term-missing
 	$(FE) npm run test:coverage
 
-security: ## Scan dependencies and app code for known vulnerabilities
+security: be-security fe-security ## Scan dependencies and app code for known vulnerabilities
+
+be-security:
 	$(BE) uv audit
 	$(BE) uv run bandit -r app -q
+
+fe-security:
 	$(FE) npm audit --audit-level=high --omit=dev
 
 e2e: ## Playwright end-to-end tests (added in Phase 10)
