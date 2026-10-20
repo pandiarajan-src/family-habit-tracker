@@ -1,6 +1,6 @@
 # Intent: Family habit tracker
 
-**Author:** Pandiarajan · **Function:** Product · **Status:** draft · **Date:** 2026-10-20
+**Author:** Pandiarajan · **Function:** Product · **Status:** Accepted · **Date:** 2026-10-20
 
 ## Problem
 
@@ -44,12 +44,12 @@ A simple web app where each family member checks off their habits each day and w
 - **Parents:** set up the prizes, plus their own habits and goals, check them off, and track their streaks, gems and prizes. They also approve prize claims and can adjust the kids' habits, goals and check-ins.
 - **Kids:** set their own habits and goals, check them off, and track their streaks, gems and prizes.
 - **Devices:** the kids don't have phones. They use tablets, and the family also shares laptops. Assume everyone uses shared devices.
-- **Systems:** a new cloud-hosted web app (none exists today), with sign-in through each person's Google account.
+- **Systems:** a new cloud-hosted web app (none exists today), with sign-in through each person's own local account.
 
 ## Constraints
 
 - It must be hosted in the cloud so the family can reach it from wherever they are.
-- It must be protected by Google login. Every family member has a Google account.
+- It must be protected by local login account.
 - It must work on shared devices (tablets and the family laptops).
 - No ads. Not a full social network.
 - The first version is for my family only, but I may make this a commercial application later, where it would need to support multiple families. Early decisions shouldn't rule that out.
