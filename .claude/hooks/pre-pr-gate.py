@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """PreToolUse hook: block PR creation unless `make verify` passes.
 
-`make verify` = lint + tests with coverage gates (backend 95%, frontend 90%)
-+ security (uv audit, bandit, npm audit), the same checks CI runs.
-Thresholds live in the Makefile and frontend/vite.config.ts; this hook only
-reads the exit code. Exit 2 blocks the tool call and sends stderr to Claude.
+`make verify` = lint + build + tests with coverage gates (backend 95%,
+frontend 90%) + security (uv audit, bandit, npm audit), the same checks CI
+runs. Thresholds live in the Makefile and frontend/vite.config.ts; this hook
+only reads the exit code. Exit 2 blocks the tool call and sends stderr to Claude.
+
+Every passing `make verify` records the tree id of the files it checked
+(tree-hash.sh) under .git/pr-gate/. If the files are still the same (whether
+committed since or not), the PR goes through without a rerun.
 """
 
 import json
@@ -15,12 +19,13 @@ import sys
 from pathlib import Path
 
 PR_CMD = re.compile(r"\bgh\s+pr\s+(create|ready)\b")
+TREE_HASH = Path(__file__).resolve().parent / "tree-hash.sh"
 TAIL_LINES = 40
 
 
-def git(root: str, *args: str) -> str:
+def run(root: str, *args: str) -> str:
     return subprocess.run(
-        ["git", *args], cwd=root, capture_output=True, text=True
+        list(args), cwd=root, capture_output=True, text=True
     ).stdout.strip()
 
 
@@ -32,13 +37,13 @@ def main() -> int:
 
     root = os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or "."
 
-    # A clean tree at a commit that already passed needs no rerun
-    # (e.g. retrying `gh pr create` after an auth or network error).
-    head = git(root, "rev-parse", "HEAD")
-    clean = git(root, "status", "--porcelain") == ""
-    stamp = Path(root, git(root, "rev-parse", "--git-path", "pr-gate"), head)
-    if clean and stamp.exists():
-        print(f"✅ PR gate: make verify already passed at {head[:7]}", file=sys.stderr)
+    tree = run(root, str(TREE_HASH))
+    stamps = Path(root, run(root, "git", "rev-parse", "--git-path", "pr-gate"))
+    if tree and (stamps / tree).exists():
+        print(
+            f"✅ PR gate: make verify already passed for these files (tree {tree[:7]})",
+            file=sys.stderr,
+        )
         return 0
 
     result = subprocess.run(
@@ -53,9 +58,6 @@ def main() -> int:
         )
         return 2
 
-    if clean:
-        stamp.parent.mkdir(parents=True, exist_ok=True)
-        stamp.touch()
     print("✅ PR gate: make verify passed", file=sys.stderr)
     return 0
 

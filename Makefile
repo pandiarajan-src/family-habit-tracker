@@ -19,9 +19,17 @@ OPENAPI_TS_VERSION := 7.13.0
 BE := cd backend &&
 FE := cd frontend &&
 
+# `make verify` records each pass here, keyed by the tree id of the files it checked;
+# .claude/hooks/pre-pr-gate.py skips its rerun when the files are unchanged.
+TREE_HASH := ./.claude/hooks/tree-hash.sh
+PR_GATE_DIR := $(shell git rev-parse --git-path pr-gate)
+# The hook tests in `make verify` run only when one of these differs from origin/main.
+HOOK_INPUTS := .claude/hooks .claude/settings.json backend/uv.lock backend/pyproject.toml \
+               backend/ruff.toml frontend/package-lock.json frontend/eslint.config.js frontend/.prettierrc
+
 .PHONY: help setup check-tools dev be-dev fe-dev build \
         lint be-lint fe-lint fmt \
-        test test-backend test-frontend be-test fe-test test-hooks coverage \
+        test test-backend test-frontend be-test fe-test test-hooks test-hooks-if-changed coverage \
         security be-security fe-security api-types e2e migrate seed-dev setup-family verify clean
 
 help: ## Show this help
@@ -82,17 +90,23 @@ fmt: ## Auto-fix lint issues and format all code
 
 test: test-backend test-frontend ## Run all unit and API tests
 
-test-backend: ## Run backend tests with coverage (fails under 95%)
-	$(BE) APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
+test-backend: ## Run backend tests with coverage (fails under 95%); lists only files with missing lines
+	$(BE) APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing:skip-covered --cov-fail-under=95
 
-test-frontend: ## Run frontend tests with coverage (thresholds in vite.config.ts)
-	$(FE) npx vitest run --coverage
+test-frontend: ## Run frontend tests with coverage (thresholds in vite.config.ts); lists only files with missing lines
+	$(FE) npx vitest run --coverage --coverage.skipFull
 
 be-test: test-backend
 fe-test: test-frontend
 
 test-hooks: ## Feed fake tool calls into the Claude Code hooks and check exit codes and output
 	./.claude/hooks/tests/run.sh
+
+test-hooks-if-changed:
+	@if git diff --quiet origin/main -- $(HOOK_INPUTS) 2>/dev/null \
+		&& [ -z "$$(git ls-files --others --exclude-standard -- $(HOOK_INPUTS))" ]; then \
+		echo "test-hooks: skipped (hooks, lock files and lint config unchanged from origin/main)"; \
+	else $(MAKE) test-hooks; fi
 
 coverage: ## Run all tests with coverage reports
 	$(BE) APP_ENV=test uv run pytest --cov --cov-report=term-missing
@@ -129,9 +143,18 @@ setup-family: ## Create the family: prompts for passcode and first parent's PIN 
 
 ## ---- All checks --------------------------------------------------------
 
-verify: lint test-hooks test security ## Lint + all tests + security scan; gates PR creation via .claude/hooks/pre-pr-gate.py (e2e joins in Phase 10)
-	@echo ""
-	@echo "✅ VERIFY PASSED"
+verify: ## Lint + build + all tests + security scan; a pass lets the PR gate skip its rerun (e2e joins in Phase 10)
+	@tree=$$($(TREE_HASH)); \
+	$(MAKE) lint build test-hooks-if-changed test security; \
+	if [ "$$($(TREE_HASH))" = "$$tree" ]; then \
+		mkdir -p "$(PR_GATE_DIR)"; \
+		find "$(PR_GATE_DIR)" -type f -mtime +7 -delete; \
+		touch "$(PR_GATE_DIR)/$$tree"; \
+	else \
+		echo "⚠️  files changed while verify ran: pass not recorded for the PR gate"; \
+	fi; \
+	echo ""; \
+	echo "✅ VERIFY PASSED"
 
 clean: ## Remove build outputs and caches (keeps dependencies)
 	rm -rf frontend/dist frontend/coverage backend/.pytest_cache backend/.ruff_cache backend/.coverage backend/htmlcov
