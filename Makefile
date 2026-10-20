@@ -22,7 +22,7 @@ FE := cd frontend &&
 .PHONY: help setup check-tools dev be-dev fe-dev build \
         lint be-lint fe-lint fmt \
         test test-backend test-frontend be-test fe-test coverage \
-        api-types e2e seed-dev verify clean
+        security be-security fe-security api-types e2e seed-dev verify clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -79,11 +79,11 @@ fmt: ## Auto-fix lint issues and format all code
 
 test: test-backend test-frontend ## Run all unit and API tests
 
-test-backend: ## Run backend tests (pytest)
-	$(BE) APP_ENV=test uv run pytest
+test-backend: ## Run backend tests with coverage (fails under 95%)
+	$(BE) APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
 
-test-frontend: ## Run frontend tests (Vitest)
-	$(FE) npm test
+test-frontend: ## Run frontend tests with coverage (thresholds in vite.config.ts)
+	$(FE) npx vitest run --coverage
 
 be-test: test-backend
 fe-test: test-frontend
@@ -91,6 +91,15 @@ fe-test: test-frontend
 coverage: ## Run all tests with coverage reports
 	$(BE) APP_ENV=test uv run pytest --cov --cov-report=term-missing
 	$(FE) npm run test:coverage
+
+security: be-security fe-security ## Scan dependencies and app code for known vulnerabilities
+
+be-security:
+	$(BE) uv audit
+	$(BE) uv run bandit -r app -q
+
+fe-security:
+	$(FE) npm audit --audit-level=high --omit=dev
 
 e2e: ## Playwright end-to-end tests (added in Phase 10)
 	@echo "e2e: no Playwright tests yet (Phase 10)."
@@ -108,9 +117,7 @@ seed-dev: ## Seed the dev database with the sample family (added in Phase 1)
 
 ## ---- All checks --------------------------------------------------------
 
-verify: ## Lint + all tests; must pass before a PR (e2e joins in Phase 10)
-	@$(MAKE) lint
-	@$(MAKE) test
+verify: lint test security ## Lint + all tests + security scan; must pass before a PR (e2e joins in Phase 10)
 	@echo ""
 	@echo "✅ VERIFY PASSED"
 
