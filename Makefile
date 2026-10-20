@@ -21,7 +21,7 @@ FE := cd frontend &&
 
 .PHONY: help setup check-tools dev be-dev fe-dev build \
         lint be-lint fe-lint fmt \
-        test test-backend test-frontend be-test fe-test coverage \
+        test test-backend test-frontend be-test fe-test test-hooks coverage \
         security be-security fe-security api-types e2e migrate seed-dev setup-family verify clean
 
 help: ## Show this help
@@ -91,6 +91,9 @@ test-frontend: ## Run frontend tests with coverage (thresholds in vite.config.ts
 be-test: test-backend
 fe-test: test-frontend
 
+test-hooks: ## Feed fake tool calls into the Claude Code hooks and check exit codes and output
+	./.claude/hooks/tests/run.sh
+
 coverage: ## Run all tests with coverage reports
 	$(BE) APP_ENV=test uv run pytest --cov --cov-report=term-missing
 	$(FE) npm run test:coverage
@@ -102,7 +105,7 @@ be-security:
 	$(BE) uv run bandit -r app -q
 
 fe-security:
-	$(FE) npm audit --audit-level=high --omit=dev
+	$(FE) npm audit --omit=dev
 
 e2e: ## Playwright end-to-end tests (added in Phase 10)
 	@echo "e2e: no Playwright tests yet (Phase 10)."
@@ -126,7 +129,7 @@ setup-family: ## Create the family: prompts for passcode and first parent's PIN 
 
 ## ---- All checks --------------------------------------------------------
 
-verify: lint test security ## Lint + all tests + security scan; must pass before a PR (e2e joins in Phase 10)
+verify: lint test-hooks test security ## Lint + all tests + security scan; gates PR creation via .claude/hooks/pre-pr-gate.py (e2e joins in Phase 10)
 	@echo ""
 	@echo "✅ VERIFY PASSED"
 
