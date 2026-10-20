@@ -27,6 +27,7 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make test` | `test-backend` then `test-frontend` |
 | `make test-backend` (`be-test`) | pytest + coverage, fails under 95%: `Required test coverage of 95% reached.` · `112 passed in ~2s` |
 | `make test-frontend` (`fe-test`) | Vitest + v8 coverage, fails under 90% lines/functions/branches (`vite.config.ts`): `Tests  5 passed (5)` · `Branches   : 100%` |
+| `make test-hooks` | `.claude/hooks/tests/run.sh` feeds fake tool calls to each hook: `✅ hook tests: 31 passed` |
 | `make coverage` | pytest `term-missing` table + v8 table, exits 0 |
 | `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
 | `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
