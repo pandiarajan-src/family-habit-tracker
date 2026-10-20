@@ -21,7 +21,7 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make be-dev` / `fe-dev` | one server only, same ports |
 | `make build` | `frontend/dist/` written, no tsc errors |
 | `make lint` | see `verify` below (ruff, eslint, prettier, tsc) |
-| `make be-lint` | `All checks passed!` · `7 files already formatted` |
+| `make be-lint` | `All checks passed!` · `50 files already formatted`; also greps for `now()`/`today()` outside `app/clock.py` |
 | `make fe-lint` | eslint silent · `All matched files use Prettier code style!` · tsc silent |
 | `make fmt` | files rewritten, exits 0 |
 | `make test` | `test-backend` then `test-frontend` |
@@ -31,7 +31,9 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make security` (`be-security` + `fe-security`) | `uv audit`: `Found no known vulnerabilities…` · bandit (app code only) silent · `npm audit --omit=dev`: `found 0 vulnerabilities` |
 | `make api-types` | regenerates `frontend/src/api/schema.d.ts`; `git diff` empty if contract unchanged |
 | `make e2e` | `e2e: no Playwright tests yet (Phase 10).` |
-| `make seed-dev` | `seed-dev: nothing to seed yet (Phase 1 adds the data model).` |
+| `make migrate` | Alembic upgrade to head on `DATABASE_URL` (also run by `make be-dev`) |
+| `make seed-dev` | `seed-dev: sample family created …` (Dad/Mum/Mia/Kavi; passcode and PINs in `app/cli.py`) |
+| `make setup-family` | prompts for passcode + first parent; prints `Family created: <id>` |
 | `make clean` | `rm -rf frontend/dist frontend/coverage backend/.pytest_cache …` |
 
 `make verify` (lint + all tests + security; must pass before a PR) ends like this:
@@ -74,7 +76,7 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - Spec: testable REQ-NNN requirements with Given/When/Then, via `intent-to-spec`.
 - Plan: files, ordered tasks, tests, risks, written to `plan.md` (not plan-mode approval).
 - Code: PRs reference the change folder; each plan phase ends green and can be its own PR.
-- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phase 0 done.
+- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–1 done.
   Read the plan's "Cross-cutting technical decisions" table before coding; don't re-decide them.
 - Shipped changes get a row in `docs/metrics/scoreboard.md`.
 

@@ -22,7 +22,7 @@ FE := cd frontend &&
 .PHONY: help setup check-tools dev be-dev fe-dev build \
         lint be-lint fe-lint fmt \
         test test-backend test-frontend be-test fe-test coverage \
-        security be-security fe-security api-types e2e seed-dev verify clean
+        security be-security fe-security api-types e2e migrate seed-dev setup-family verify clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -47,7 +47,7 @@ setup: check-tools ## Install backend and frontend dependencies from the lock fi
 dev: ## Run backend (:8000) and frontend (:5173) together; Ctrl-C stops both
 	@$(MAKE) -j2 be-dev fe-dev
 
-be-dev: ## Run the backend with auto-reload
+be-dev: migrate ## Run the backend with auto-reload (applies migrations first)
 	$(BE) uv run fastapi dev app/main.py --port $(BACKEND_PORT)
 
 fe-dev: ## Run the Vite dev server (proxies /api to the backend)
@@ -63,6 +63,9 @@ lint: be-lint fe-lint ## Lint and type-check everything (no changes made)
 be-lint:
 	$(BE) uv run ruff check .
 	$(BE) uv run ruff format --check .
+	@# Time comes only from app/clock.py (ruff DTZ misses date.today() and aware now(tz)).
+	@$(BE) if grep -rnE '(datetime|date)\.(now|utcnow|today)\(' app migrations --include='*.py' \
+		| grep -v '^app/clock.py:'; then echo "❌ use app/clock.py for the current time"; exit 1; fi
 
 fe-lint:
 	$(FE) npm run lint
@@ -112,8 +115,14 @@ api-types: ## Regenerate frontend/src/api/schema.d.ts from the backend OpenAPI
 	$(FE) npx --yes openapi-typescript@$(OPENAPI_TS_VERSION) openapi.json -o src/api/schema.d.ts
 	@rm -f frontend/openapi.json
 
-seed-dev: ## Seed the dev database with the sample family (added in Phase 1)
-	@echo "seed-dev: nothing to seed yet (Phase 1 adds the data model)."
+migrate: ## Apply database migrations (Alembic) to DATABASE_URL
+	$(BE) uv run python -m app.cli migrate
+
+seed-dev: ## Seed the dev database with the sample family (refuses APP_ENV=prod)
+	$(BE) uv run python -m app.cli seed-dev
+
+setup-family: ## Create the family: prompts for passcode and first parent's PIN (FAMILY_TZ=Europe/London)
+	$(BE) uv run python -m app.cli setup-family --timezone $${FAMILY_TZ:-Europe/London}
 
 ## ---- All checks --------------------------------------------------------
 

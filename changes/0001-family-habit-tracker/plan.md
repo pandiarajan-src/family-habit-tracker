@@ -20,7 +20,7 @@ These apply to every phase. They are fixed here so phases don't re-decide them.
 | Earned gems | Earned gems are **derived** by pure functions in `app/domain/` from CheckIns, StreakSavers and WeeklyTargets (spec §3). Spends live in `GemTransaction`. Balance = earned + Σ transactions, floored at 0 with a `correction_writeoff` (REQ-014/021). |
 | Concurrency | Check-in PUT uses `INSERT … ON CONFLICT(habit_id,date) DO NOTHING`, then a select: 201 if inserted, 200 if not (REQ-012). Gem spends (savers, claims) run in `BEGIN IMMEDIATE` and re-check the balance inside the transaction. |
 | Sessions | Opaque 128-bit+ id in an HttpOnly, SameSite=Lax cookie; `Secure` comes from config (on in prod; off for http://localhost because WebKit drops Secure cookies there). Activity is updated only when the request lacks `X-Background-Refresh: 1` (spec §4 marker). |
-| CSRF | Double-submit: `POST /sessions` sets a non-HttpOnly `csrf_token` cookie. The client echoes it in `X-CSRF-Token` on every non-GET request. Middleware returns `403` on a mismatch (§7 NFR). |
+| CSRF | Double-submit: `POST /sessions` sets a non-HttpOnly `csrf_token` cookie. The client echoes it in `X-CSRF-Token` on every non-GET request. The session dependency (`require_family`) returns `403` on a mismatch, after the session check, so a request with no session is always `401` (§7 NFR). |
 | Hashing / limits | `argon2-cffi` for passcode and PINs. Passcode limiter: in-memory sliding window per client IP (10 per 15 min, REQ-001), valid while we run one uvicorn worker. PIN lockout is persisted on `MemberCredential` (REQ-003). |
 | Privacy logging | A logging filter plus custom access-log format that never logs request bodies or query values. Logs carry IDs only. A log-capture test covers sign-in, failed sign-in, PIN entry and member creation [child-data-privacy #2]. |
 | API types in FE | `openapi-typescript` generates `frontend/src/api/schema.d.ts` from `/openapi.json` (`make api-types`). CI fails if the generated file is stale, so the frontend can't drift from the contract. |
@@ -55,17 +55,17 @@ These apply to every phase. They are fixed here so phases don't re-decide them.
 ## Phase 1 — Backend foundation: data model, sessions, access control
 
 **Files that change**
-- `backend/app/db.py`: engine, FK/WAL pragmas, `get_db` dependency, `transaction(immediate=True)` helper.
+- `backend/app/db.py`: engine, FK/WAL pragmas, `get_db` dependency, `transaction(immediate=True)` helper. *As built:* SQLAlchemy issues BEGIN itself (pysqlite's auto-BEGIN off, the documented SQLite recipe), so `immediate=True` emits `BEGIN IMMEDIATE`.
 - `backend/app/clock.py`: `Clock` protocol, `SystemClock`, `FrozenClock` (tests), and `family_today(tz)`.
-- `backend/app/models/`: one module per spec §3 entity (`family`, `member`, `credential`, `session`, `habit`, `weekly_target`, `check_in`, `streak_saver`, `gem_transaction`, `prize`, `prize_claim`, `adjustment`). Every family-owned table has `family_id`.
-- `backend/migrations/` + `alembic.ini`: the initial migration.
-- `backend/app/security/`: `hashing.py`, `sessions.py` (the `require_family`, `require_member`, `require_parent` dependencies; idle expiry; background-refresh handling), `csrf.py`, `rate_limit.py`, `headers.py` (CSP, HSTS, `X-Content-Type-Options`), `log_redaction.py`.
+- `backend/app/models/`: one module per spec §3 entity. Every family-owned table has `family_id`. *As built:* Phase 1 adds only the access-control tables (`family`, `member`, `credential`, `session` → `DeviceSession`); the rest (`habit`, `weekly_target`, `check_in`, `streak_saver`, `gem_transaction`, `prize`, `prize_claim`, `adjustment`) land in Phase 3 with their own migrations and tests. The session row stores a SHA-256 of the cookie value, not the value.
+- `backend/migrations/` + `alembic.ini`: the initial migration (`0001_access_control`). `app.db.upgrade_to_head(url)` runs it from code; `make migrate` (also run by `make be-dev`).
+- `backend/app/security/`: `hashing.py`, `sessions.py` (the `require_family`, `require_member`, `require_parent` dependencies; idle expiry; background-refresh handling), `csrf.py`, `rate_limit.py`, `headers.py` (CSP, HSTS, `X-Content-Type-Options`), `log_redaction.py`. *As built:* the CSRF check runs inside `require_family` (after the session check) rather than as middleware, so a request with no session is always `401`. `/docs` and `/redoc` are off when `APP_ENV=prod` (they load a CDN, [child-data-privacy #5]) and get a relaxed CSP elsewhere. `app/errors.py` strips submitted `input` values from 422 bodies so passcodes/PINs are never echoed.
 - `backend/app/routers/sessions.py` (POST/GET/PATCH/DELETE `/sessions[/current]`) and `families.py` (GET/PATCH `/families/current`).
 - `backend/app/schemas/{session,family,member}.py` (`MemberRead` without credential fields, `extra="forbid"` on every `*Create`/`*Update`).
-- `backend/app/cli.py`: `uv run fht setup-family` (prompts for passcode and first parent PIN without echo, so they stay out of shell history) and `fht seed-dev`.
-- `backend/tests/conftest.py`: temp DB, frozen clock, factories, and `client_as(member)` / `client_family_only()` fixtures.
+- `backend/app/cli.py`: `uv run python -m app.cli setup-family` / `make setup-family` (prompts for passcode and first parent PIN without echo, so they stay out of shell history) and `seed-dev` / `make seed-dev`. *As built:* no `fht` console script, because that needs a build backend in `pyproject.toml` (a new dependency).
+- `backend/tests/conftest.py` + `tests/support.py`: temp DB, frozen clock, seeded family, and `anon` / `unlocked` / `as_parent` / `as_child` / `make_client` fixtures.
 
-**Order of work:** db + clock → models + migration → hashing → `setup-family` CLI → session create (passcode, limiter, cookies) → `require_*` dependencies + idle expiry → PATCH session (PIN, lockout) → DELETE session → families → security headers + CSRF middleware → log redaction + log-capture test.
+**Order of work:** db + clock → models + migration → hashing → `setup-family` CLI → session create (passcode, limiter, cookies) → `require_*` dependencies + idle expiry → PATCH session (PIN, lockout) → DELETE session → families → security headers + CSRF check → log redaction + log-capture test.
 
 **Tests that prove it works**
 - REQ-001: correct passcode → 201 + cookie flags; wrong → 401; 11th attempt → 429 even with the right passcode; no cookie on every data route → 401 (a parametrised test over `app.routes`); captured logs contain no passcode.
@@ -73,7 +73,8 @@ These apply to every phase. They are fixed here so phases don't re-decide them.
 - REQ-003: correct PIN sets the acting member; wrong → 401; 6th → 429 for member A only (member B still works); a write with no acting member → 403; logs show IDs only.
 - REQ-004: with the clock advanced past 5 idle min, reads and writes → 401. The acting member and the family session share one 5-minute idle timer, so the session has always ended too, and REQ-028 makes a missing session 401. Spec REQ-004's "next write returns 403" can't be reached; flagged for spec clarification. Background-refresh requests don't extend expiry; a person-initiated request at 4 min does. Two clients act as different members.
 - REQ-027: GET/PATCH timezone; a bad IANA name → 422; datetimes carry the family offset; unit tests for family dates across DST and midnight.
-- REQ-028 (scaffold): an other-family ID → 404 helper (`get_owned_or_404`); a permission-matrix unit table.
+- REQ-028 (scaffold): an other-family ID → 404 helper (`get_owned_or_404`). *As built:* the permission-matrix unit table moved to Phase 2 with `app/domain/permissions.py`.
+- Unit (spec §7) *as built:* `tests/unit/` covers hashing and the limiter window (REQ-001), the PIN lockout counter (REQ-003), idle-timeout and background-refresh rules (REQ-004), and family dates (REQ-027). `tests/test_db.py` covers the pragmas, a DB-level cascade and `transaction()`. `make be-lint` greps for `now()`/`today()` outside `app/clock.py`.
 - NFR: CSP and HSTS headers present; cookie `HttpOnly; SameSite=Lax` (+`Secure` under prod settings); a missing CSRF token → 403.
 - Cross-cutting: a schema test that `MemberRead` exposes only `id, nickname, avatar_emoji, role, gem_balance, gems_held` [child-data-privacy #1].
 
@@ -257,7 +258,7 @@ No DB and no FastAPI. Inputs are plain dataclasses (dates of check-ins, saved pe
 
 **Files that change:** `Dockerfile` (multi-stage: build the frontend, then a uv runtime serving the API + `dist`), `deploy/` config for the chosen host, `docs/runbook.md` (setup-family, running migrations, one worker, no backups per C11), `scripts/smoke.sh` (HTTPS reachable, HSTS present, `/api/v1/members` → 401), `docs/metrics/scoreboard.md` row.
 
-**Order of work:** Dockerfile → host with a persistent volume for the SQLite file → TLS → `alembic upgrade head` on start → `fht setup-family` → smoke test from outside the home network → manual iPad Safari check (§7 Browsers).
+**Order of work:** Dockerfile → host with a persistent volume for the SQLite file → TLS → `alembic upgrade head` on start → `make setup-family` → smoke test from outside the home network → manual iPad Safari check (§7 Browsers).
 
 **Tests that prove it works:** the smoke script (NFR Hosting); manual tablet check list.
 
