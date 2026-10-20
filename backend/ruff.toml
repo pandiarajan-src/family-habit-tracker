@@ -1,0 +1,13 @@
+target-version = "py314"
+line-length = 100
+
+[lint]
+# DTZ: no naive datetimes / datetime.now() (time comes from app/clock.py).
+select = ["E", "W", "F", "I", "B", "UP", "S", "DTZ", "SIM", "RUF"]
+
+[lint.per-file-ignores]
+# assert is how pytest checks things.
+"tests/**" = ["S101"]
+
+[format]
+quote-style = "double"
