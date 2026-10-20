@@ -102,7 +102,7 @@ be-security:
 	$(BE) uv run bandit -r app -q
 
 fe-security:
-	$(FE) npm audit --audit-level=high --omit=dev
+	$(FE) npm audit --omit=dev
 
 e2e: ## Playwright end-to-end tests (added in Phase 10)
 	@echo "e2e: no Playwright tests yet (Phase 10)."
@@ -126,7 +126,7 @@ setup-family: ## Create the family: prompts for passcode and first parent's PIN 
 
 ## ---- All checks --------------------------------------------------------
 
-verify: lint test security ## Lint + all tests + security scan; must pass before a PR (e2e joins in Phase 10)
+verify: lint test security ## Lint + all tests + security scan; gates PR creation via .claude/hooks/pre-pr-gate.py (e2e joins in Phase 10)
 	@echo ""
 	@echo "✅ VERIFY PASSED"
 

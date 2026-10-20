@@ -36,7 +36,7 @@ Run from the repo root. `make` loads `.env` (created from `.env.example` by `mak
 | `make setup-family` | prompts for passcode + first parent; prints `Family created: <id>` |
 | `make clean` | `rm -rf frontend/dist frontend/coverage backend/.pytest_cache …` |
 
-`make verify` (lint + all tests + security; must pass before a PR) ends like this:
+`make verify` (lint + all tests + security; gates PR creation via a hook, see Definition of done) ends like this:
 ```
 cd backend && APP_ENV=test uv run pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
 ........................................................................ [ 64%]
@@ -57,7 +57,7 @@ Lines        : 100% ( 14/14 )
 cd backend && uv audit
 Found no known vulnerabilities and no adverse project statuses in 74 packages
 cd backend && uv run bandit -r app -q
-cd frontend && npm audit --audit-level=high --omit=dev
+cd frontend && npm audit --omit=dev
 found 0 vulnerabilities
 
 ✅ VERIFY PASSED
@@ -100,10 +100,13 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 ## Definition of done
 - Every plan phase or bug fix that changes code adds unit tests for that change, then runs
   `make build` and `make verify`; both must pass.
-- Then run `make coverage`: unit-test coverage must be at least 98% (backend and frontend). If it is lower,
-  add unit tests and rerun `make build`, `make verify` and `make coverage` until it is back to 98% or higher.
-- `make security` is clean. A real false positive gets `# nosec B<id>: <reason>` on that line and is mentioned
-  in the PR. Never silence a finding without a reason.
+- Unit-test coverage must be at least 95% backend and 90% frontend (lines/functions/branches), enforced by
+  `make test`. If it is lower, add unit tests and rerun `make build` and `make verify` until both pass.
+- A real security false positive gets `# nosec B<id>: <reason>` on that line and is mentioned in the PR.
+  Never silence a finding without a reason.
+- PR creation is gated by a `PreToolUse` hook (`.claude/hooks/pre-pr-gate.py`): `gh pr create`/`gh pr ready`
+  runs `make verify` (lint, coverage gates, 0 vulnerabilities) and is blocked if it fails. When blocked,
+  fix the cause; never lower a threshold or edit the hook to get through.
 - Run `make verify` and paste the output before saying a task is complete.
 - If a test fails, fix the code, not the test.
 - Update `plan.md` in the same commit if the implementation diverged.
