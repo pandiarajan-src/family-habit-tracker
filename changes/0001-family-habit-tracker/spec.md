@@ -72,7 +72,7 @@ Terms used below:
 - Given a member payload with any extra field (for example email, birthdate, age, photo or location), when it is submitted, then the API returns `422` and nothing is stored [child-data-privacy #1].
 - Given a duplicate nickname within the family, when it is submitted, then the API returns `422`.
 - Given any acting member, when they edit their own nickname or avatar, then the change is saved. Only a parent can change a member's role, and the API returns `403` to a child who tries.
-- Given an attempt to remove or demote the last remaining parent, when it is submitted, then the API returns `422` with a detail explaining that a family needs at least one parent.
+- Given an attempt to demote the last remaining parent, when it is submitted, then the API returns `422` with a detail explaining that a family needs at least one parent.
 
 ### REQ-007: Remove a member and all of their data
 **User story:** As a parent, I want removing a member to delete everything about them, so that no data about them is left behind.
@@ -81,6 +81,7 @@ Terms used below:
 - Given the removed member, when their former check-ins are queried through the API or directly in the database, then none remain [child-data-privacy #4].
 - Given records where the removed member was only the actor (for example a parent who approved a claim or corrected a check-in), when the member is removed, then those records stay, with the actor shown as "a family member".
 - Given a non-existent member ID, when removal is requested, then the API returns `404`.
+- Given the last remaining parent, when their removal is requested, then the API returns `422` with a detail explaining that a family needs at least one parent, and nothing is deleted.
 
 ### Habits
 
@@ -128,12 +129,13 @@ Terms used below:
 - Given a device showing the Family board, when another device saves a check-in, then the board shows it within 30 seconds, or right away when the screen regains focus. Background refreshes don't extend the session (REQ-004).
 
 ### REQ-013: Check in for yesterday
+> Note: the one-day window (approved in C7) covers the intent's "forgot yesterday" case without letting old gaps be filled for gems; see section 8, Q6.
+
 **User story:** As a family member, I want to check off a habit I did yesterday but forgot to record, so that one forgetful evening doesn't break my streak.
 **Acceptance criteria:**
 - Given an acting member, when they switch My day to "Yesterday" and check off a habit, then the check-in is saved for yesterday's family date and streaks and gems are recalculated.
 - Given a member (child or parent acting for themselves), when they try to check in for a date before yesterday, then the API returns `422` with a detail saying only today and yesterday can be checked in.
 - Given any member, when they try to check in for a future date, or a date before the habit was created, then the API returns `422`.
-- The one-day window (approved in C7) covers the intent's "forgot yesterday" case without letting old gaps be filled for gems; see section 8, Q6.
 
 ### REQ-014: Parents correct a child's check-ins
 **User story:** As a parent, I want to add or remove a check-in on any past day for my child, so that I can fix mistakes.
@@ -167,7 +169,7 @@ Terms used below:
 - Given a weekly habit with target N, when a family week (Monday–Sunday) has at least N check-in days, then that week is complete.
 - Given a weekly habit, when its streak is calculated, then it equals the number of complete weeks in the current unbroken run, where the current week counts once it is complete and doesn't break the run while it is still in progress.
 - Given a week that ended below target and has no streak saver, when the streak is calculated, then the run has ended.
-- Weeks start on Monday (ISO-8601) in the family's timezone (approved in C7) [api-conventions #5].
+- Given a weekly habit checked in at 23:30 on a Sunday in the family's timezone, when weeks are calculated, then the check-in counts toward the week that began the previous Monday, and a check-in at 00:00 the next Monday counts toward the new week. Weeks start on Monday (ISO-8601) in the family's timezone (approved in C7) [api-conventions #5].
 
 ### REQ-018: Gems for daily habits
 **User story:** As a family member, I want to earn gems for each daily check-in and bonus gems for streak milestones, so that keeping a streak feels rewarding.
@@ -190,6 +192,7 @@ Terms used below:
 **User story:** As a family member, I want to spend gems to save my streak after a day I couldn't do a habit, so that one bad day doesn't wipe out weeks of effort.
 **Acceptance criteria:**
 - Given a daily habit with a past day that has no check-in, is within the last 7 family days, is not today, and directly follows a checked-in or saved day, when the member chooses "Use a streak saver", then the gems are deducted, the day shows as "Saved", and the streak continues.
+- Given today, a day more than 7 family days ago, or a day that doesn't directly follow a checked-in or saved day, when a streak saver is requested for it, then the API returns `422` and no gems are spent.
 - Given a streak, when savers are used within the same unbroken run, then the 1st costs 1 gem, the 2nd 2 gems, the 3rd 3 gems, and so on (two saved days cost 3 gems in total). The cost goes back to 1 when a run ends and a new one starts.
 - Given the member's available gems are fewer than the cost, when they try to use a saver, then the API returns `409` and the screen says "You need 3 gems for this saver — keep going and you'll get there!". The streak is not saved and the balance doesn't change.
 - Given a weekly habit, when the most recent past week ended below target, then a streak saver can be used for that week with the same rising cost.
@@ -510,6 +513,9 @@ Where a mockup and the spec disagree, **the spec wins**. C12–C15 are resolved,
 - **Hosting:** cloud-hosted and reachable from anywhere over HTTPS (intent). No database backups in this version (C11).
 - **Future multi-family:** every family-owned row carries `family_id` and every query is scoped by the session's family (REQ-028).
 - **API documentation:** OpenAPI at `/docs` matches implemented routes, schemas and status codes [api-conventions #7].
+- **Measuring success (intent):** no analytics or extra UI; the author checks both measures with read-only database queries [child-data-privacy #5].
+  - *Kids open the app daily without reminders:* in days 31–60 after launch, each child has at least one check-in they made themselves (`created_by_member_id = member_id`) on at least 25 of 30 family days. This is a proxy: the app can't tell whether a child was reminded, so it counts their own check-ins.
+  - *Streaks last longer than on paper:* before launch, the author records each child's typical longest streak on the paper chart; after one month, each child's best `best_streak` (REQ-016) is compared with it.
 
 ## 7. Test strategy
 
@@ -517,43 +523,50 @@ Every endpoint gets a pytest API test with a success case and at least one failu
 
 | REQ | Unit | API | E2E |
 |---|---|---|---|
-| REQ-001 | Passcode hash verify; rate limiter windowing | Correct → 201 + cookie; wrong → 401; 11th attempt → 429; every data route without cookie → 401; captured logs contain no passcode | Unlock with passcode; wrong passcode shows kind error |
+| REQ-001 | Passcode hash verify; rate limiter windowing | Correct → 201 + cookie; wrong → 401; 11th attempt → 429, even with the correct passcode; every data route without cookie → 401; captured logs contain no passcode | Unlock with passcode; wrong passcode shows kind error |
 | REQ-002 | — (no logic beyond session delete) | Parent DELETE → 204, replayed cookie → 401; child → 403 | Parent signs device out, lands on Passcode entry |
-| REQ-003 | PIN lockout counter | Correct PIN → acting member set; wrong → 401; 6th → 429; write with no acting member → 403; logs have IDs only | Tap avatar, type PIN on keypad by keyboard and touch |
+| REQ-003 | PIN lockout counter | Correct PIN → acting member set; wrong → 401; 6th → 429; with member A locked out, member B's correct PIN still works; write with no acting member → 403; logs have IDs only | Tap avatar, type PIN on keypad by keyboard and touch |
 | REQ-004 | Idle-timeout calculation for acting member and family session; background requests ignored | After simulated 5 min idle: write → 403 and read → 401; background-refresh requests don't extend expiry; a person-initiated request at 4 min does | "Done — switch person" returns to board; after 5 idle minutes (simulated clock) the device shows Passcode entry with kind copy; two browser contexts act as different members |
 | REQ-005 | PIN format validation; current-PIN check feeds lockout counter | Self set with correct current PIN → 204; missing current PIN → 422; wrong current PIN → 401, 5th wrong → 429; parent resets child without current PIN → 204 + adjustment; child sets other → 403; "12a4" → 422 | Change own PIN on My PIN; mismatched confirmation shows kind message and sends nothing; parent resets child PIN, child unlocks with new PIN |
-| REQ-006 | Nickname/emoji validation | Create → 201; extra `birthdate` field → 422; duplicate nickname → 422; child changes role → 403; remove last parent → 422 | Parent adds a child member |
-| REQ-007 | — (enforced by DB cascade) | Delete member → 204; their check-ins, habits, savers, transactions, claims, credential, adjustments all gone (API and DB query); actor columns null; unknown ID → 404 | Parent removes member after confirmation |
+| REQ-006 | Nickname/emoji validation | Create → 201; extra `birthdate` field → 422; duplicate nickname → 422; member edits own nickname/avatar → 200; child changes role → 403; demote last parent → 422 | Parent adds a child member |
+| REQ-007 | — (enforced by DB cascade) | Delete member → 204; their check-ins, habits, savers, transactions, claims, credential, adjustments all gone (API and DB query); actor columns null; unknown ID → 404; remove last parent → 422 and nothing deleted | Parent removes member after confirmation |
 | REQ-008 | Habit validation (title, weekly target, 20 limit) | Daily/weekly create → 201; weekly without target → 422; 21st → 422; child for other → 403 | Create a weekly habit "Piano, 3 times a week" |
-| REQ-009 | Target effective-from-week resolution | Rename keeps streak; archive hides from today list; delete → 204 removes check-ins; unknown → 404 | Archive a habit, see it in History only |
+| REQ-009 | Target effective-from-week resolution | Rename keeps streak; archive hides from today list; unarchive restarts the streak from today; delete → 204 removes check-ins, recalculates earned gems and leaves spent gems unchanged; unknown → 404 | Archive a habit, see it in History only |
 | REQ-010 | Permission matrix | Parent edits child habit → 200 + adjustment; parent edits other parent → 403; child edits sibling → 403 | Parent opens "Kavi's habits" from Family settings and edits a goal; child sees no Parent tab |
-| REQ-011 | — | PUT today → 201; DELETE → 204 and gems revert | Check off in ≤ 2 taps from My day; keyboard-only check-off; timed passcode + PIN + check-off < 60 s |
+| REQ-011 | — | PUT today → 201; DELETE → 204 and gems revert; weekly habit checked in today counts once toward week progress, a repeat PUT doesn't add another | Check off in ≤ 2 taps from My day; keyboard-only check-off; timed passcode + PIN + check-off < 60 s |
 | REQ-012 | — | Two concurrent PUTs → one row, 201 + 200; concurrent PUT/DELETE leaves consistent balance | Two browser contexts check in at once; board updates within 30 s |
 | REQ-013 | Window check in family timezone | Yesterday → 201; 2 days ago → 422; future → 422; before created_on → 422 | Toggle to Yesterday and check off |
 | REQ-014 | Recalculation after correction; shortfall written off to exactly 0 | Parent adds child check-in 30 days back → 201 + adjustment; parent edits other parent's old day → 403; removing check-ins after spending → balance 0 (not negative) and a `correction_writeoff` row; next check-in → balance 1; re-adding the removed check-ins → gems restored and write-off kept | Parent corrects a child's day in History |
-| REQ-015 | Adjustment text rendering | Adjustments listed for target; ack → 200; other member ack → 403; stored rows hold IDs only | Child sees "updated" notice and dismisses it |
+| REQ-015 | Adjustment text rendering | Adjustments listed for target, newest first, last 12 months only; a parent's own list is empty; ack → 200; other member ack → 403; stored rows hold IDs only | Child sees "updated" notice and dismisses it |
 | REQ-016 | Streak function: runs, saved days, today pending, best streak, timezone boundaries | HabitRead streak fields match fixture history | Streak shown on My day after check-off |
 | REQ-017 | Week completion with changing targets; in-progress week | Weekly streak fields match fixtures | Weekly progress "2 of 3" updates |
 | REQ-018 | Gem function: day 1–30 table (5→+5, 7→+7, 12→+5, 14→+7…); per-habit gems; recompute after backfill joins runs | Balance after scripted check-ins equals expected | Gem count animates up after check-off |
 | REQ-019 | Weekly gem function (weeks 5, 10, 15 bonuses; no 7-week bonus) | Balance after scripted weeks | — (covered by unit + API; no extra UI behaviour beyond REQ-021) |
-| REQ-020 | Saver eligibility (7-day window, must follow a done/saved day), rising cost, reset on new run, weekly variant | 1st saver → 201 cost 1, 2nd cost 2; insufficient → 409; check-in on saved day → 409; parent saves for child → adjustment | Use a streak saver from My day; insufficient-gems copy contains no "missed"/"failed" |
+| REQ-020 | Saver eligibility (7-day window, must follow a done/saved day), rising cost, reset on new run, weekly variant | 1st saver → 201 cost 1, 2nd cost 2; insufficient → 409; saver for today, 8 days back or a day after a gap → 422 and balance unchanged; check-in on saved day → 409; parent saves for child → adjustment | Use a streak saver from My day; insufficient-gems copy contains no "missed"/"failed" |
 | REQ-021 | Balance = earned − spent − held + write-offs, never below 0 | Transactions list includes derived earnings and write-offs; another member → 403 | Gems & prizes shows balance and held amount |
-| REQ-022 | — | GET members/habits with family session and no acting member → 200 | Board at 360px is one column; shows all members' progress |
+| REQ-022 | — | GET members/habits with family session and no acting member → 200 | Board at 360px is one column; shows all members' progress; a child opening a sibling's card sees no edit controls, a parent opening a child's card does |
 | REQ-023 | Day-state mapping; weekly week-state mapping (complete / saved / in progress, never per-day "Saved"); today never "Saved" | Range > 62 days → 422; data from 12 months ago returned | Navigate back 12 months in Month view; states have text labels; week view at 360px has `scrollWidth <= clientWidth` for every card and no clipped day labels |
-| REQ-024 | Cost validation | Parent create → 201; child → 403; delete with pending claim → 409; delete otherwise → 204 | Parent adds a prize |
+| REQ-024 | Cost validation | Parent create → 201; child → 403; delete with pending claim → 409; delete otherwise → 204 and past claims keep title and cost; edit cost → pending claim keeps its original cost | Parent adds a prize |
 | REQ-025 | Hold/release arithmetic | Claim with enough → 201 + hold; not enough → 409; cancel → gems released | Child claims a prize; sees "more gems to go" when short |
-| REQ-026 | Approver-eligibility rule (parent count) | Approve → spent; decline → released; own claim with two parents → 403; own claim with one parent → 200; non-pending → 409 | Parent approves claim; child sees approval |
-| REQ-027 | Family-date conversion across DST and midnight | Check-in at 23:59 local counted for local date; datetimes carry offset; bad tz → 422 | — (timezone not observable in-browser beyond REQ-013 E2E) |
+| REQ-026 | Approver-eligibility rule (parent count) | Approve → spent; decline → released; own claim with two parents → 403; own claim with one parent → 200; non-pending → 409 | Parent approves claim; child sees approval; parent declines a claim, claimant sees "Not this time — your gems are back." and their balance restored |
+| REQ-027 | Family-date conversion across DST and midnight | Check-in at 23:59 local counted for local date; datetimes carry offset; bad tz → 422; timezone change leaves existing check-in dates unchanged and the next check-in uses the new zone | — (timezone not observable in-browser beyond REQ-013 E2E) |
 | REQ-028 | Permission matrix table | Each write endpoint: no session → 401, no acting member → 403, wrong role → 403; other family's ID → 404 | Child sees no parent-only controls |
 
 Cross-cutting: a log-capture test for [child-data-privacy #2]; a dependency/HTML check for trackers and external hosts [child-data-privacy #5]; an OpenAPI check that every route has the `/api/v1` prefix, schemas and declared status codes [api-conventions #1] [api-conventions #2] [api-conventions #7]; an axe scan of each screen [family-ux #5]; a copy lint for "failed", "missed", "bad" [family-ux #6].
+
+Non-functional (section 6):
+- **Security headers:** API test asserts `Content-Security-Policy: default-src 'self'` and `Strict-Transport-Security` on responses, and that the session cookie is `HttpOnly; Secure; SameSite=Lax`.
+- **CSRF:** a state-changing request without a valid CSRF token (or the equivalent mechanism chosen in the plan) → `403`.
+- **Performance:** a scripted load test shows the check-in PUT p95 < 300 ms server-side; a Playwright run with throttled 4G and CPU shows My day interactive in < 2 s.
+- **Browsers:** E2E runs as Playwright Chromium, Firefox and WebKit projects. Edge is covered by Chromium; iPadOS Safari is approximated by WebKit and checked by hand on the family's tablet before release.
+- **Hosting:** a post-deploy smoke test confirms the app answers over HTTPS from outside the home network.
 
 ## 8. Answers to the intent's open questions
 
 1. **Daily gem per habit or once per day?** — **Per day, per habit** (REQ-018): each habit checked in on a day earns 1 gem. *Decided by the author (C2).*
 2. **Day 7 both bonuses? How do they repeat?** — **Yes**, day 5 gives +5 and day 7 gives a further +7. Bonuses repeat on **a 7-day cycle**: days 5, 7, 12, 14, 19, 21, … *Decided by the author (C2).*
 3. **Missed-day exemption** — spending gems **keeps the streak alive** (the saved day bridges the run but earns no gem and doesn't add to the count); the cost **rises within one unbroken run and resets to 1 only when a new run starts**; with too few gems the saver is **refused (409)** and the streak ends; the **same rule applies to weekly habits**, per week; a saver can be used only **within 7 days of the day it covers**, and only directly after a done/saved day (REQ-020). *Decided by the author for this version (C3); may be revisited once the family has used it.*
-4. **Can a parent change a kid's data without the kid knowing?** — **No.** Every parent change creates an adjustment the child sees as a notice and in a history list (REQ-015). This keeps the kids' trust in the game. *Resolved in this spec; author may override.*
+4. **Can a parent change a kid's data without the kid knowing?** — **No.** Every parent change creates an adjustment the child sees as a notice and in a history list (REQ-015). This keeps the kids' trust in the game. *Decided by the author (2026-10-20).*
 5. **Signing out on shared devices** — two layers: a family session per device (family passcode [child-data-privacy #3]) and an acting member unlocked with a personal 4-digit PIN (REQ-003). The acting member clears on "Done — switch person"; both the acting member and the family session end after **5 minutes without activity**, so a device never stays signed in longer than that (REQ-004). Parents can also sign a device out right away (REQ-002). *Decided by the author (C1 option B; C7 timeout).*
 6. **Check in for a past day?** — Members can check in for **today or yesterday**; parents can correct a child's check-ins for **any day** (REQ-013, 014). *Approved by the author (C7).*
 
