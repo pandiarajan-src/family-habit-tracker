@@ -41,7 +41,7 @@ AIDLC pipeline: **intent → spec → plan → code**. Each stage is a reviewed 
 - Spec: testable REQ-NNN requirements with Given/When/Then, via `intent-to-spec`.
 - Plan: files, ordered tasks, tests, risks, written to `plan.md` (not plan-mode approval).
 - Code: PRs reference the change folder; each plan phase ends green and can be its own PR.
-- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–2 done
+- Current change: `0001-family-habit-tracker` — REQ-001…REQ-028, phases 0–11, Phases 0–3 done
   (update this line when a phase merges).
   Read the plan's "Cross-cutting technical decisions" table before coding; don't re-decide them.
 - Shipped changes get a row in `docs/metrics/scoreboard.md`.

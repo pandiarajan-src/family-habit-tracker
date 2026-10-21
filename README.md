@@ -22,6 +22,7 @@ make verify    # lint + type-check + all tests; prints ✅ VERIFY PASSED
 `make dev` applies database migrations first (`make migrate` runs them on their own).
 The sample family's passcode and PINs are in `backend/app/cli.py` (dev only; `seed-dev` refuses `APP_ENV=prod`).
 For a real family, run `make setup-family` instead: it asks for the passcode and the first parent's PIN without showing them (set `FAMILY_TZ`, default `Europe/London`).
+To set up the whole family in one go, run `scripts/family-setup.sh`: it creates the family and first parent, then adds members until you type `exit`. If a family already exists, it offers to update it (a member's nickname, avatar emoji, role or PIN, add a member, or change the family passcode) or to delete it and start again.
 
 Other targets: `make help`. Settings are environment variables; see [`.env.example`](.env.example).
 After changing a backend route or schema, run `make api-types` and commit `frontend/src/api/schema.d.ts` (CI checks it's up to date).

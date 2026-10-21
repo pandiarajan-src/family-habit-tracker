@@ -13,7 +13,9 @@
       "Bash(gh pr view*)",
       "Bash(gh pr create*)",
       "Bash(gh issue view*)",
-      "Read(./.env.example)"
+      "Read(./.env.example)",
+      "Bash(git branch -D *)",
+      "Bash(git checkout -b *)"
     ],
     "deny": [
       "Read(./.env)",

@@ -1,0 +1,23 @@
+.ring {
+  display: block;
+  flex: none;
+}
+
+.track {
+  stroke: var(--surface-sunken);
+}
+
+.arc {
+  stroke: var(--teal);
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.full .arc {
+  stroke: var(--success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc {
+    transition: none;
+  }
+}

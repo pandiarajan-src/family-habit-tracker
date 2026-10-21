@@ -1,0 +1,26 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  max-width: 100%;
+  padding: 0 var(--space-4) 0 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 700 14px/20px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.emoji {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  background: var(--sun-soft);
+  font-size: 18px;
+  line-height: 1;
+}

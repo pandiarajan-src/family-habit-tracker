@@ -8,18 +8,59 @@
 
 body {
   margin: 0;
-  font-family: var(--font-body);
-  background: var(--color-bg);
-  color: var(--color-text);
+  min-width: 320px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* One visible focus ring for everything that takes keyboard focus [family-ux #1]. */
 :focus-visible {
-  outline: 3px solid var(--color-focus);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.app {
-  width: min(100%, 72rem);
+/* Visually hidden, still read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Page body below a header: centred, fluid, single column at 360px [family-ux #1]. */
+.page {
+  width: 100%;
+  max-width: var(--content-max);
   margin-inline: auto;
-  padding: var(--space-4);
+  padding: var(--space-6) var(--gutter) 48px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.page-title {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 800;
+}
+
+.page-lead {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--ink-muted);
 }

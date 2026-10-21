@@ -1,0 +1,155 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--surface);
+}
+
+/* Decorative brand panel: on top at phone width, on the left from about 720px. */
+.brand {
+  flex: 1 1 340px;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(24px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  background: var(--teal);
+  color: var(--on-teal);
+}
+
+.bars {
+  position: absolute;
+  top: -12px;
+  right: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.bars span {
+  width: 64px;
+  border-radius: 12px;
+}
+
+.bars span:nth-child(1) {
+  height: 120px;
+  background: var(--sun);
+}
+
+.bars span:nth-child(2) {
+  height: 88px;
+  background: var(--teal-soft);
+}
+
+.bars span:nth-child(3) {
+  height: 56px;
+  background: var(--success);
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dots span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sun);
+}
+
+.dots span:last-child {
+  background: transparent;
+  border: 3px solid var(--teal-soft);
+}
+
+.tagline {
+  max-width: 520px;
+  font-size: clamp(24px, 3.2vw, 44px);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.main {
+  flex: 1 1 360px;
+  min-width: 0;
+  padding: clamp(24px, 5vw, 64px) clamp(16px, 5vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app {
+  font: 800 15px/20px var(--font-sans);
+  color: var(--teal-ink);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font: 700 14px/20px var(--font-sans);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 500 16px/24px var(--font-sans);
+}
+
+.hasError .input {
+  border-color: var(--danger);
+}
+
+.hint {
+  font: 600 13px/18px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.error {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font: 700 14px/20px var(--font-sans);
+  color: var(--ink);
+}
+
+.error svg {
+  margin-top: 1px;
+  color: var(--danger);
+}
+
+.wait {
+  font: 700 15px/22px var(--font-sans);
+  text-align: center;
+}
+
+.footer {
+  font: 600 14px/20px var(--font-sans);
+  color: var(--ink-muted);
+}

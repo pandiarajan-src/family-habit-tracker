@@ -1,0 +1,16 @@
+.main {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.forgot {
+  font: 600 15px/22px var(--font-sans);
+  color: var(--ink-muted);
+  text-align: center;
+}

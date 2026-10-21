@@ -1,9 +1,79 @@
+/* Design tokens from the Family Habit Tracker design system (docs/design/mvp). */
 :root {
-  --font-body: 'Nunito', system-ui, sans-serif;
-  --color-bg: #fffaf3;
-  --color-text: #2b2118;
-  --color-focus: #1f5fbf;
-  --space-2: 0.5rem;
-  --space-4: 1rem;
-  --target-min: 44px;
+  --surface: #fdfaf4;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f4eee3;
+  --line: #e6dccb;
+  --line-strong: #8c806d;
+  --ink: #2a2620;
+  --ink-muted: #675e52;
+  --teal: #0f766e;
+  --on-teal: #ffffff;
+  --teal-soft: #d6f1ec;
+  --teal-ink: #0b5752;
+  --sun: #f5c518;
+  --on-sun: #2a2620;
+  --sun-soft: #fff3c4;
+  --sun-ink: #6e5100;
+  --success: #2e7d32;
+  --on-success: #ffffff;
+  --success-soft: #e2f3df;
+  --flame: #d9480f;
+  --gem: var(--teal);
+  --danger: #b42318;
+  --on-danger: #ffffff;
+  --danger-soft: #fdebe7;
+  --focus-ring: #0b5752;
+  --shadow-card: 0 1px 2px rgb(42 38 32 / 6%), 0 4px 12px rgb(42 38 32 / 6%);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --content-max: 1200px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+
+  /* Every control is at least this big [family-ux #2]. */
+  --touch-min: 44px;
+  --tabbar-height: 64px;
+  --avatar-size: 32px;
+
+  /* Nunito is bundled by @fontsource (main.tsx), never loaded from a font host [child-data-privacy #5]. */
+  --font-sans:
+    'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #181b1a;
+    --surface-raised: #222726;
+    --surface-sunken: #121514;
+    --line: #343b39;
+    --line-strong: #7f8b87;
+    --ink: #f2efe8;
+    --ink-muted: #b1aba0;
+    --teal: #2dd4bf;
+    --on-teal: #0c1f1d;
+    --teal-soft: #113a35;
+    --teal-ink: #86eadc;
+    --sun: #f7cf3d;
+    --on-sun: #181b1a;
+    --sun-soft: #3a3112;
+    --sun-ink: #f7d95c;
+    --success: #66c66f;
+    --on-success: #0e1f10;
+    --success-soft: #173a1c;
+    --flame: #ff8a4c;
+    --danger: #ff9b8f;
+    --on-danger: #2a0d09;
+    --danger-soft: #3d1c18;
+    --focus-ring: #86eadc;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
+  }
 }
