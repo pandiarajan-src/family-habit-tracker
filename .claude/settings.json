@@ -11,7 +11,7 @@
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(gh pr view*)",
-      "Bash(gh pr create*)",
+      "Bash(gh pr create *)",
       "Bash(gh issue view*)",
       "Read(./.env.example)",
       "Bash(git branch -D *)",

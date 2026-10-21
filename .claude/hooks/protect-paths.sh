@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# PreToolUse (Edit|Write): guard local secrets, lock files and CI workflows.
+# PreToolUse (Edit|Write): guard local secrets, lock files, CI workflows, and tests while .claude/.fix-mode exists.
 # Exit 2 + stderr blocks; a JSON permissionDecision "ask" hands the call to the human.
+
 set -euo pipefail
 
 path=$(jq -r '.tool_input.file_path // empty')
@@ -34,4 +35,13 @@ case "$rel" in
       '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $r}}'
     ;;
 esac
+
+if [ -f "$root/.claude/.fix-mode" ]; then
+  case "$rel" in
+    backend/tests/*|e2e/*|frontend/src/test/*|*.test.ts|*.test.tsx)
+      block "fix mode is on: the reproduction test is committed and locked." \
+        "fix production code; if the test is wrong, stop and explain to the user." ;;
+  esac
+fi
+
 exit 0
