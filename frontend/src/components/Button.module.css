@@ -1,0 +1,78 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  min-width: var(--touch-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  font: 700 16px/20px var(--font-sans);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.lg {
+  min-height: 56px;
+  padding: 0 var(--space-6);
+  font-size: 18px;
+}
+
+.sm {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-3);
+  font-size: 14px;
+}
+
+.block {
+  display: flex;
+  width: 100%;
+}
+
+.primary {
+  background: var(--teal);
+  color: var(--on-teal);
+}
+
+.secondary {
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--teal-ink);
+  padding-inline: var(--space-3);
+}
+
+.quiet:hover {
+  background: var(--teal-soft);
+}
+
+.button:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+  border-color: var(--line);
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:active {
+    transform: none;
+  }
+}

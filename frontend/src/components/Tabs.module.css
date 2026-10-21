@@ -1,0 +1,33 @@
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  min-height: var(--tabbar-height);
+  padding: 6px var(--space-3);
+}
+
+.tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  font: 700 13px/16px var(--font-sans);
+  text-align: center;
+  text-decoration: none;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.active,
+.active:hover {
+  background: var(--teal-soft);
+  color: var(--teal-ink);
+}

@@ -1,0 +1,59 @@
+.updated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 14px/20px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* One column at 360px, as many 260px+ columns as fit above that (REQ-022). */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-4);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+}
+
+.panelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.panelTitle {
+  font: 800 22px/28px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.viewOnly {
+  font: 700 14px/20px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.habits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-3);
+}
+
+.empty {
+  font: 600 16px/24px var(--font-sans);
+  color: var(--ink-muted);
+}
