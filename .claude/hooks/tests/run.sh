@@ -80,7 +80,19 @@ check "ordinary file is allowed silently" 0
 [ -z "$OUT$ERR" ] || { fail=$((fail + 1)); echo "  ✗ ordinary file produced output"; }
 run protect-paths.sh '{"tool_input": {}}'
 check "missing file_path is allowed" 0
-
+# New addition to validate that fix-mode blocks test edits and allows production code edits.
+fix=$(new_repo)
+mkdir -p "$fix/.claude"
+run protect-paths.sh "$(edit "$fix/backend/tests/test_x.py")" "$fix"
+check "test edit allowed without fix-mode" 0
+touch "$fix/.claude/.fix-mode"
+for f in backend/tests/test_x.py backend/tests/conftest.py e2e/a.spec.ts \
+         frontend/src/App.test.tsx frontend/src/lib/x.test.ts frontend/src/test/setup.ts; do
+  run protect-paths.sh "$(edit "$fix/$f")" "$fix"
+  check "fix-mode blocks $f" 2 "" "fix mode is on"
+done
+run protect-paths.sh "$(edit "$fix/backend/app/main.py")" "$fix"
+check "fix-mode allows production code" 0
 # ------------------------------------------------------------------ no-secrets
 echo "no-secrets.sh"
 # Fake keys are built at runtime so this file never contains a literal secret.
