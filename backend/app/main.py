@@ -12,7 +12,17 @@ from app.clock import Clock, SystemClock
 from app.config import Settings
 from app.db import make_engine
 from app.errors import install_error_handlers
-from app.routers import families, sessions
+from app.routers import (
+    adjustments,
+    check_ins,
+    families,
+    habits,
+    members,
+    prize_claims,
+    prizes,
+    sessions,
+    streak_savers,
+)
 from app.security.headers import install_security_headers
 from app.security.log_redaction import install_log_redaction
 from app.security.rate_limit import FailureWindow
@@ -65,7 +75,17 @@ def create_app(settings: Settings | None = None, clock: Clock | None = None) -> 
     install_security_headers(app)
     app.include_router(health_router, prefix=API_PREFIX)
     app.include_router(sessions.router, prefix=API_PREFIX)
-    app.include_router(families.router, prefix=API_PREFIX)
+    for module in (
+        families,
+        members,
+        habits,
+        check_ins,
+        streak_savers,
+        prizes,
+        prize_claims,
+        adjustments,
+    ):
+        app.include_router(module.router, prefix=API_PREFIX)
     return app
 
 

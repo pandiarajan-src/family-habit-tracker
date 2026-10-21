@@ -1,10 +1,11 @@
 """Passcode entry, who's checking in (PIN), switch person and sign out (REQ-001 to REQ-004)."""
 
 import logging
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
-from sqlmodel import select
+from sqlmodel import Session, select
 
 from app.models import DeviceSession, Family, Member, MemberCredential
 from app.schemas.member import MemberRead
@@ -25,6 +26,8 @@ from app.security.sessions import (
     wrong_passcode,
     wrong_pin,
 )
+from app.services.balance import balance_of
+from app.services.context import Ctx
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +37,16 @@ _401 = unauthorized_doc("No family session, or it ended after 5 idle minutes", P
 _403 = {"description": "Missing CSRF token, or the acting member isn't allowed"}
 
 
-def _session_read(row: DeviceSession, family: Family, acting: Member | None) -> SessionRead:
+def _session_read(
+    db: Session, now: datetime, row: DeviceSession, family: Family, acting: Member | None
+) -> SessionRead:
+    member = None
+    if acting is not None:
+        ctx = Ctx(db=db, family_id=family.id, timezone=family.timezone, now=now)
+        member = MemberRead.from_member(acting, balance_of(ctx, acting.id))
     return SessionRead(
         family_id=family.id,
-        acting_member=MemberRead.from_member(acting) if acting else None,
+        acting_member=member,
         expires_at=row.expires_at.astimezone(ZoneInfo(family.timezone)),
     )
 
@@ -77,7 +86,7 @@ def create_session(
 
     row = start_session(db, response, request, family)
     logger.info("session started family_id=%s", family.id)
-    return _session_read(row, family, None)
+    return _session_read(db, now, row, family, None)
 
 
 @router.get(
@@ -86,8 +95,8 @@ def create_session(
     summary="Get this device's session and acting member",
     responses={401: _401},
 )
-def read_session(auth: FamilyAuth) -> SessionRead:
-    return _session_read(auth.session, auth.family, auth.acting_member)
+def read_session(auth: FamilyAuth, db: Db, clock: ClockDep) -> SessionRead:
+    return _session_read(db, clock.now(), auth.session, auth.family, auth.acting_member)
 
 
 @router.patch(
@@ -112,7 +121,7 @@ def update_session(body: SessionUpdate, auth: FamilyAuth, db: Db, clock: ClockDe
         row.acting_member_last_activity_at = None
         db.add(row)
         db.commit()
-        return _session_read(row, auth.family, None)
+        return _session_read(db, clock.now(), row, auth.family, None)
 
     member = get_owned_or_404(db, Member, body.acting_member_id, auth.family.id)
     credential = db.get(MemberCredential, member.id)
@@ -139,7 +148,7 @@ def update_session(body: SessionUpdate, auth: FamilyAuth, db: Db, clock: ClockDe
     db.add_all([credential, row])
     db.commit()
     logger.info("acting member set member_id=%s session_family_id=%s", member.id, auth.family.id)
-    return _session_read(row, auth.family, member)
+    return _session_read(db, now, row, auth.family, member)
 
 
 @router.delete(

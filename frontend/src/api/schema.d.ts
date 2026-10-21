@@ -75,10 +75,391 @@ export interface paths {
         patch: operations["update_family_api_v1_families_current_patch"];
         trace?: never;
     };
+    "/api/v1/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the family's members with their gem balances */
+        get: operations["list_members_api_v1_members_get"];
+        put?: never;
+        /** Add a family member (parents only) */
+        post: operations["create_member_api_v1_members_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members/{member_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one member */
+        get: operations["read_member_api_v1_members__member_id__get"];
+        put?: never;
+        post?: never;
+        /** Remove a member and all of their data (parents only) */
+        delete: operations["delete_member_api_v1_members__member_id__delete"];
+        options?: never;
+        head?: never;
+        /** Edit a nickname or avatar (yourself or a parent); change a role (parents only) */
+        patch: operations["update_member_api_v1_members__member_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/members/{member_id}/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set your own PIN, or reset a child's PIN (parents) */
+        put: operations["set_pin_api_v1_members__member_id__credentials_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members/{member_id}/gem-transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A member's gem earnings and spends, newest first (yourself or a parent) */
+        get: operations["list_gem_transactions_api_v1_members__member_id__gem_transactions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List habits, optionally for one member and including archived ones */
+        get: operations["list_habits_api_v1_habits_get"];
+        put?: never;
+        /** Create a habit for yourself, or for a child (parents) */
+        post: operations["create_habit_api_v1_habits_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one habit with its streak and progress */
+        get: operations["read_habit_api_v1_habits__habit_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete a habit with its check-ins and savers; spent gems stay spent */
+        delete: operations["delete_habit_api_v1_habits__habit_id__delete"];
+        options?: never;
+        head?: never;
+        /** Rename, change the goal or weekly target, archive or bring back a habit */
+        patch: operations["update_habit_api_v1_habits__habit_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/check-ins/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Check off a habit for a day (repeats return the same check-in) */
+        put: operations["put_check_in_api_v1_habits__habit_id__check_ins__day__put"];
+        post?: never;
+        /** Undo a check-in (no-op if there is none) */
+        delete: operations["delete_check_in_api_v1_habits__habit_id__check_ins__day__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/check-ins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check-ins in a date range of up to 62 days (History) */
+        get: operations["list_check_ins_api_v1_check_ins_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/streak-savers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Spend gems to save a past day (or last week) so the streak carries on */
+        post: operations["use_streak_saver_api_v1_habits__habit_id__streak_savers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/streak-savers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Streak savers in a date range of up to 62 days (History) */
+        get: operations["list_streak_savers_api_v1_streak_savers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prizes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the family's prizes, cheapest first */
+        get: operations["list_prizes_api_v1_prizes_get"];
+        put?: never;
+        /** Add a prize (parents only) */
+        post: operations["create_prize_api_v1_prizes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prizes/{prize_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a prize (parents only); past claims keep its title and cost */
+        delete: operations["delete_prize_api_v1_prizes__prize_id__delete"];
+        options?: never;
+        head?: never;
+        /** Edit a prize (parents only); pending claims keep their cost */
+        patch: operations["update_prize_api_v1_prizes__prize_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/prize-claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List prize claims, newest first */
+        get: operations["list_claims_api_v1_prize_claims_get"];
+        put?: never;
+        /** Claim a prize for yourself; its cost is held until a parent decides */
+        post: operations["create_claim_api_v1_prize_claims_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prize-claims/{claim_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Approve or decline a claim (parents), or cancel your own */
+        patch: operations["update_claim_api_v1_prize_claims__claim_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The last 12 months of changes to a member's data, newest first
+         * @description Defaults to the acting member. A parent can see anyone's; a child only their own.
+         */
+        get: operations["list_adjustments_api_v1_adjustments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/adjustments/{adjustment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Dismiss a change notice ("Got it"); only the member it is about */
+        patch: operations["acknowledge_adjustment_api_v1_adjustments__adjustment_id__patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AdjustmentKind
+         * @enum {string}
+         */
+        AdjustmentKind: "habit_created" | "habit_updated" | "habit_archived" | "habit_deleted" | "check_in_added" | "check_in_removed" | "streak_saver_used" | "pin_reset";
+        /**
+         * AdjustmentRead
+         * @description IDs only; the client joins nicknames and titles it already has (REQ-015).
+         */
+        AdjustmentRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            kind: components["schemas"]["AdjustmentKind"];
+            /**
+             * Actor Member Id
+             * @description Null once that member is removed
+             */
+            actor_member_id: string | null;
+            /**
+             * Target Member Id
+             * Format: uuid
+             */
+            target_member_id: string;
+            /**
+             * Habit Id
+             * @description Null once the habit is deleted
+             */
+            habit_id: string | null;
+            /**
+             * Date
+             * @description The day that changed, for check-ins and savers
+             */
+            date: string | null;
+            /** Acknowledged At */
+            acknowledged_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AdjustmentUpdate */
+        AdjustmentUpdate: {
+            /**
+             * Acknowledged
+             * @constant
+             */
+            acknowledged: true;
+        };
+        /**
+         * CheckInCreate
+         * @description No fields: the habit and the date are in the path.
+         */
+        CheckInCreate: Record<string, never>;
+        /** CheckInRead */
+        CheckInRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Habit Id
+             * Format: uuid
+             */
+            habit_id: string;
+            /**
+             * Member Id
+             * Format: uuid
+             */
+            member_id: string;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Created By Member Id
+             * @description Null once that member is removed
+             */
+            created_by_member_id: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description In the family's timezone (ISO-8601 with offset)
+             */
+            created_at: string;
+        };
+        /**
+         * ClaimStatus
+         * @enum {string}
+         */
+        ClaimStatus: "pending" | "approved" | "declined" | "cancelled";
         /** FamilyRead */
         FamilyRead: {
             /**
@@ -94,10 +475,116 @@ export interface components {
             /** Timezone */
             timezone: string;
         };
+        /**
+         * Frequency
+         * @enum {string}
+         */
+        Frequency: "daily" | "weekly";
+        /** GemTransactionRead */
+        GemTransactionRead: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "daily_checkin" | "daily_bonus_5" | "daily_bonus_7" | "weekly_goal" | "weekly_bonus_5" | "streak_saver" | "prize_hold" | "prize_release" | "correction_writeoff";
+            /**
+             * Amount
+             * @description Positive for earnings, releases and write-offs
+             */
+            amount: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Habit Id */
+            habit_id?: string | null;
+            /** Prize Claim Id */
+            prize_claim_id?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HabitCreate */
+        HabitCreate: {
+            /**
+             * Member Id
+             * Format: uuid
+             */
+            member_id: string;
+            /** Title */
+            title: string;
+            /** Goal Note */
+            goal_note?: string | null;
+            frequency: components["schemas"]["Frequency"];
+            /** Weekly Target */
+            weekly_target?: number | null;
+        };
+        /** HabitRead */
+        HabitRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Member Id
+             * Format: uuid
+             */
+            member_id: string;
+            /** Title */
+            title: string;
+            /** Goal Note */
+            goal_note: string | null;
+            frequency: components["schemas"]["Frequency"];
+            /**
+             * Weekly Target
+             * @description This week's target; null for daily habits
+             */
+            weekly_target: number | null;
+            /**
+             * Created On
+             * Format: date
+             */
+            created_on: string;
+            /** Archived */
+            archived: boolean;
+            /** Current Streak */
+            current_streak: number;
+            /** Best Streak */
+            best_streak: number;
+            /**
+             * Streak Pending
+             * @description The streak is alive but today (or this week) isn't done yet (REQ-016)
+             */
+            streak_pending: boolean;
+            /** Today Done */
+            today_done: boolean;
+            /** @description Weekly habits only */
+            week_progress: components["schemas"]["WeekProgressRead"] | null;
+            /**
+             * Next Saver Cost
+             * @description The cheapest saver available now, or null if nothing can be saved
+             */
+            next_saver_cost: number | null;
+            /** Saveable Periods */
+            saveable_periods: components["schemas"]["SaveablePeriodRead"][];
+        };
+        /**
+         * HabitUpdate
+         * @description Only the fields sent change; `goal_note: null` clears the note.
+         */
+        HabitUpdate: {
+            /** Title */
+            title?: string | null;
+            /** Goal Note */
+            goal_note?: string | null;
+            /** Weekly Target */
+            weekly_target?: number | null;
+            /** Archived */
+            archived?: boolean | null;
         };
         /** HealthRead */
         HealthRead: {
@@ -106,6 +593,41 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /**
+         * MemberCreate
+         * @description Nickname, avatar, role and a first PIN only: any other field is a 422 [child-data-privacy
+         *     #1].
+         */
+        MemberCreate: {
+            /** Nickname */
+            nickname: string;
+            /** Avatar Emoji */
+            avatar_emoji: string;
+            role: components["schemas"]["Role"];
+            /**
+             * Pin
+             * @description Exactly 4 digits
+             */
+            pin: string;
+        };
+        /**
+         * MemberCredentialUpdate
+         * @description Set a PIN. `current_pin` is required for your own PIN, not for a parent's reset (C14).
+         *
+         *     Never logged or echoed [child-data-privacy #2].
+         */
+        MemberCredentialUpdate: {
+            /**
+             * Pin
+             * @description Exactly 4 digits
+             */
+            pin: string;
+            /**
+             * Current Pin
+             * @description Required to change your own PIN
+             */
+            current_pin?: string | null;
         };
         /**
          * MemberRead
@@ -126,10 +648,124 @@ export interface components {
              * @enum {string}
              */
             role: "parent" | "child";
-            /** Gem Balance */
+            /**
+             * Gem Balance
+             * @description Available gems, never below 0 (REQ-021)
+             */
             gem_balance: number;
-            /** Gems Held */
+            /**
+             * Gems Held
+             * @description Gems held by pending prize claims (REQ-021)
+             */
             gems_held: number;
+        };
+        /** MemberUpdate */
+        MemberUpdate: {
+            /** Nickname */
+            nickname?: string | null;
+            /** Avatar Emoji */
+            avatar_emoji?: string | null;
+            /** @description Only a parent can change a role */
+            role?: components["schemas"]["Role"] | null;
+        };
+        /** PrizeClaimCreate */
+        PrizeClaimCreate: {
+            /**
+             * Prize Id
+             * Format: uuid
+             */
+            prize_id: string;
+        };
+        /** PrizeClaimRead */
+        PrizeClaimRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Prize Id
+             * @description Null once the prize is deleted
+             */
+            prize_id: string | null;
+            /**
+             * Prize Title
+             * @description As it was when the claim was made
+             */
+            prize_title: string;
+            /**
+             * Gem Cost
+             * @description As it was when the claim was made
+             */
+            gem_cost: number;
+            /**
+             * Member Id
+             * Format: uuid
+             */
+            member_id: string;
+            status: components["schemas"]["ClaimStatus"];
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By Member Id */
+            decided_by_member_id: string | null;
+        };
+        /**
+         * PrizeClaimUpdate
+         * @description Parents approve or decline; the claimant cancels.
+         */
+        PrizeClaimUpdate: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "approved" | "declined" | "cancelled";
+        };
+        /** PrizeCreate */
+        PrizeCreate: {
+            /** Title */
+            title: string;
+            /** Gem Cost */
+            gem_cost: number;
+        };
+        /** PrizeRead */
+        PrizeRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Gem Cost */
+            gem_cost: number;
+        };
+        /** PrizeUpdate */
+        PrizeUpdate: {
+            /** Title */
+            title?: string | null;
+            /** Gem Cost */
+            gem_cost?: number | null;
+        };
+        /**
+         * Role
+         * @enum {string}
+         */
+        Role: "parent" | "child";
+        /** SaveablePeriodRead */
+        SaveablePeriodRead: {
+            /**
+             * Period Start
+             * Format: date
+             * @description The day, or the Monday of the week, to save
+             */
+            period_start: string;
+            /** Cost */
+            cost: number;
         };
         /** SessionCreate */
         SessionCreate: {
@@ -161,6 +797,46 @@ export interface components {
             /** Pin */
             pin?: string | null;
         };
+        /** StreakSaverCreate */
+        StreakSaverCreate: {
+            /**
+             * Period Start
+             * Format: date
+             * @description The day to save, or the Monday of the week
+             */
+            period_start: string;
+        };
+        /** StreakSaverRead */
+        StreakSaverRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Habit Id
+             * Format: uuid
+             */
+            habit_id: string;
+            /**
+             * Member Id
+             * Format: uuid
+             */
+            member_id: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /** Cost */
+            cost: number;
+            /**
+             * Created At
+             * Format: date-time
+             * @description In the family's timezone (ISO-8601 with offset)
+             */
+            created_at: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -173,6 +849,18 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WeekProgressRead */
+        WeekProgressRead: {
+            /**
+             * Done
+             * @description Check-in days this family week (may exceed the target)
+             */
+            done: number;
+            /** Target */
+            target: number;
+            /** Complete */
+            complete: boolean;
         };
     };
     responses: never;
@@ -453,6 +1141,1330 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    list_members_api_v1_members_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_member_api_v1_members_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    read_member_api_v1_members__member_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_member_api_v1_members__member_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A family always needs at least one parent */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_member_api_v1_members__member_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_pin_api_v1_members__member_id__credentials_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberCredentialUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Session missing or ended (`FamilyPasscode`), or wrong current PIN (`MemberPIN`) */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode" | "MemberPIN";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many wrong PINs for this member; ask a parent or wait 5 min */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_gem_transactions_api_v1_members__member_id__gem_transactions_get: {
+        parameters: {
+            query?: {
+                /** @description Default: 12 months before `to` */
+                from?: string | null;
+                /** @description Default: today */
+                to?: string | null;
+            };
+            header?: never;
+            path: {
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GemTransactionRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_habits_api_v1_habits_get: {
+        parameters: {
+            query?: {
+                member_id?: string | null;
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_habit_api_v1_habits_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Member not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid habit, or the member already has 20 active habits */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    read_habit_api_v1_habits__habit_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_habit_api_v1_habits__habit_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_habit_api_v1_habits__habit_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_check_in_api_v1_habits__habit_id__check_ins__day__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CheckInCreate"] | null;
+            };
+        };
+        responses: {
+            /** @description Already checked in: the existing check-in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInRead"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description That day was saved with a streak saver */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Outside the window: only today and yesterday for your own habits; never a future day or a day before the habit was created */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_check_in_api_v1_habits__habit_id__check_ins__day__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Outside the window: only today and yesterday for your own habits; never a future day or a day before the habit was created */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_check_ins_api_v1_check_ins_get: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                member_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Range over 62 days, or `to` before `from` */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    use_streak_saver_api_v1_habits__habit_id__streak_savers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StreakSaverCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakSaverRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not enough gems, or that day is already checked in */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description That day or week can't be saved (REQ-020) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_streak_savers_api_v1_streak_savers_get: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                member_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakSaverRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Range over 62 days, or `to` before `from` */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_prizes_api_v1_prizes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_prize_api_v1_prizes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrizeCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_prize_api_v1_prizes__prize_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prize_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A claim for this prize is waiting for a decision */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_prize_api_v1_prizes__prize_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prize_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrizeUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_claims_api_v1_prize_claims_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ClaimStatus"] | null;
+                member_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeClaimRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_claim_api_v1_prize_claims_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrizeClaimCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeClaimRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not enough gems yet */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_claim_api_v1_prize_claims__claim_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrizeClaimUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrizeClaimRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The claim isn't pending any more */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_adjustments_api_v1_adjustments_get: {
+        parameters: {
+            query?: {
+                member_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdjustmentRead"][];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    acknowledge_adjustment_api_v1_adjustments__adjustment_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                adjustment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdjustmentUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdjustmentRead"];
+                };
+            };
+            /** @description No family session, or it ended after 5 idle minutes */
+            401: {
+                headers: {
+                    /** @description `FamilyPasscode`: unlock again; `MemberPIN`: wrong PIN */
+                    "WWW-Authenticate"?: "FamilyPasscode";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing CSRF token, no acting member, or not allowed (REQ-028) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found in this family */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
