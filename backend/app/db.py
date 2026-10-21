@@ -9,8 +9,9 @@ from alembic import command
 from alembic.config import Config
 from fastapi import Request
 from sqlalchemy import DateTime, Engine, event
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.types import TypeDecorator
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent.parent / "migrations"
 
@@ -82,6 +83,22 @@ def transaction(db: Session, *, immediate: bool = False) -> Iterator[Session]:
         raise
 
 
+def insert_if_absent(
+    db: Session, model: type[SQLModel], values: dict, conflict_columns: list[str]
+) -> bool:
+    """`INSERT … ON CONFLICT DO NOTHING`; True if the row was inserted (plan: Concurrency).
+
+    Two devices checking in the same habit and day both succeed, and exactly one row exists.
+    Kept here so a move to Postgres only changes this module (plan: Phase 11 risk).
+    """
+    statement = (
+        sqlite_insert(model)
+        .values(**values)
+        .on_conflict_do_nothing(index_elements=conflict_columns)
+    )
+    return db.execute(statement).rowcount == 1
+
+
 def upgrade_to_head(database_url: str) -> None:
     """Run Alembic migrations up to the latest revision."""
     config = Config()
@@ -91,5 +108,7 @@ def upgrade_to_head(database_url: str) -> None:
 
 
 def get_db(request: Request) -> Iterator[Session]:
-    with Session(request.app.state.engine) as db:
+    # Rows stay readable after a commit without a new (deferred) read transaction, so a route
+    # can open its own `transaction(immediate=True)` after the session check has committed.
+    with Session(request.app.state.engine, expire_on_commit=False) as db:
         yield db

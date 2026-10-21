@@ -15,7 +15,8 @@ from fastapi import Depends, HTTPException, Request, Response, status
 from sqlmodel import Session, SQLModel
 
 from app.clock import Clock
-from app.db import get_db
+from app.db import get_db, transaction
+from app.domain.permissions import Action, is_allowed
 from app.models import DeviceSession, Family, Member, Role
 from app.security.csrf import CSRF_COOKIE, check_csrf, new_csrf_token
 
@@ -123,27 +124,31 @@ def _is_person_initiated(request: Request) -> bool:
 
 
 def require_family(request: Request, db: Db, clock: ClockDep) -> Auth:
+    """Check the session and record activity in one transaction that ends before the route runs.
+
+    It takes the write lock up front: two devices recording activity at once would otherwise hit
+    SQLite's busy-snapshot error. The route then starts its own `transaction()` if it writes.
+    """
     token = request.cookies.get(SESSION_COOKIE)
     if not token:
         raise _unauthorized()
-    row = db.get(DeviceSession, _token_id(token))
+    now = clock.now()
+    with transaction(db, immediate=True):
+        row = db.get(DeviceSession, _token_id(token))
+        expired = row is not None and is_expired(row, now)
+        if row is not None and expired:
+            db.delete(row)
+        elif row is not None:
+            check_csrf(request)
+            apply_activity(row, now, person_initiated=_is_person_initiated(request))
+            db.add(row)
+            # A session can't outlive its family: the FK cascades deletes.
+            family = db.get_one(Family, row.family_id)
+            acting = db.get(Member, row.acting_member_id) if row.acting_member_id else None
     if row is None:
         raise _unauthorized()
-    now = clock.now()
-    if is_expired(row, now):
-        db.delete(row)
-        db.commit()
+    if expired:
         raise _unauthorized("Signed out after 5 quiet minutes")
-    check_csrf(request)
-
-    apply_activity(row, now, person_initiated=_is_person_initiated(request))
-    db.add(row)
-    db.commit()
-    db.refresh(row)
-
-    # A session can't outlive its family: the FK cascades deletes.
-    family = db.get_one(Family, row.family_id)
-    acting = db.get(Member, row.acting_member_id) if row.acting_member_id else None
     return Auth(session=row, family=family, acting_member=acting)
 
 
@@ -188,6 +193,25 @@ def require_parent(auth: MemberAuth) -> Auth:
 
 
 ParentAuth = Annotated[Auth, Depends(require_parent)]
+
+
+def ensure_allowed(
+    action: Action,
+    actor: Member,
+    owner: Member | None = None,
+    *,
+    parent_count: int = 1,
+) -> None:
+    """403 unless the permission matrix (REQ-028) lets `actor` do `action` to `owner`'s data."""
+    allowed = is_allowed(
+        action,
+        actor.role,
+        owner.role if owner is not None else None,
+        is_self=owner is not None and owner.id == actor.id,
+        parent_count=parent_count,
+    )
+    if not allowed:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="You can't change that")
 
 
 def get_owned_or_404[T: SQLModel](db: Session, model: type[T], id_: UUID, family_id: UUID) -> T:

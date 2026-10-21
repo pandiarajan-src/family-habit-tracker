@@ -19,6 +19,7 @@ from tests.support import (
     SAMPLE_MEMBERS,
     Person,
     SeededFamily,
+    Seeder,
     act_as,
     unlock,
 )
@@ -40,7 +41,8 @@ def settings(tmp_path) -> Settings:
         app_env="test",
         database_url=f"sqlite:///{tmp_path / 'test.db'}",
         cookie_secure=False,
-        log_level="WARNING",
+        # Every app log line reaches caplog, so the privacy checks see INFO lines too.
+        log_level="DEBUG",
     )
 
 
@@ -144,3 +146,19 @@ def as_child(unlocked: TestClient, family: SeededFamily) -> TestClient:
     response = act_as(unlocked, family["Mia"])
     assert response.status_code == 200, response.text
     return unlocked
+
+
+@pytest.fixture
+def db(settings: Settings, family: SeededFamily) -> Iterator[Session]:
+    """A database session on the test database (after the family is seeded)."""
+    from app.db import make_engine
+
+    engine = make_engine(settings.database_url)
+    with Session(engine) as session:
+        yield session
+    engine.dispose()
+
+
+@pytest.fixture
+def seed(db: Session, family: SeededFamily) -> Seeder:
+    return Seeder(db, family.id)

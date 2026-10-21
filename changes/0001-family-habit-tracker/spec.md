@@ -612,6 +612,11 @@ Non-functional (section 6):
 - **C20 — What "unarchiving starts it again from today" means for the run.** Default: no run carries over into the unarchive day (or, for a weekly habit, that week), so the streak restarts from it and a saver can't cover a day on or before it. Archiving freezes the streak at the archive date. Phase 3 needs to store the last unarchive date (e.g. `Habit.active_since`) to feed this.
 - **C21 — A saver that joins two runs, and a saved week later completed.** Default: a saver that fills the gap between two runs costs 1 + the savers already in both runs, because afterwards they are one unbroken run (REQ-020). If a parent correction later completes a saved week, the week counts as complete (it earns its gem) and the saver's gems stay spent ("no refunds", section 10).
 
+### Found during Phase 3 — open (minor; the API uses the default shown)
+
+- **C22 — What happens to a saver's spend when its habit is deleted.** §3 says `GemTransaction.streak_saver_id` cascades with its parent, but REQ-009 says gems already spent stay spent when a habit is deleted, and deleting the habit deletes its savers. Default: `streak_saver_id` is `SET NULL`, so the spend stays in the ledger (without a habit) and the balance doesn't go up.
+- **C23 — Check-ins and savers on an archived habit.** REQ-009 freezes an archived habit's streak but doesn't say whether it can still be checked in or saved. Default: both return `422` ("Bring the habit back first"), so a frozen streak stays frozen; a parent who needs to correct one unarchives it first.
+
 ## 10. Out of scope
 
 - Reminders, notifications, email or push messages (intent).
