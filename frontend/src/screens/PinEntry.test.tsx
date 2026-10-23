@@ -32,7 +32,9 @@ describe('REQ-003 PIN pad', () => {
     expect(dots()).toHaveAccessibleName('3 of 4 digits entered')
     await tap(user, '4')
 
-    expect(await screen.findByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Here’s your day/ }),
+    ).toBeInTheDocument()
     expect(api.callsTo('PATCH /sessions/current')[0].body).toEqual({
       acting_member_id: mia.id,
       pin: '1234',
@@ -54,7 +56,9 @@ describe('REQ-003 PIN pad', () => {
     expect(dots()).toHaveAccessibleName('1 of 4 digits entered')
     await user.keyboard('234')
 
-    expect(await screen.findByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Here’s your day/ }),
+    ).toBeInTheDocument()
     expect(api.callsTo('PATCH /sessions/current')[0].body).toMatchObject({ pin: '1234' })
   })
 

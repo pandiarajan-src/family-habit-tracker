@@ -3,7 +3,7 @@ import { Icon, type IconName } from './Icon'
 import styles from './Notice.module.css'
 
 interface NoticeProps {
-  tone?: 'info' | 'caution'
+  tone?: 'info' | 'caution' | 'sun'
   icon?: IconName
   title?: string
   children?: ReactNode

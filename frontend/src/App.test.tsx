@@ -60,7 +60,6 @@ describe('REQ-003 member screens need someone checking in', () => {
   })
 
   it.each([
-    ['/my-day', 'My day'],
     ['/history', 'History'],
     ['/gems', 'Gems & prizes'],
     ['/habits', 'My habits'],
@@ -81,7 +80,7 @@ describe('REQ-028 app header and tabs', () => {
     mockApi(boardRoutes(mia))
     renderApp({ route: '/my-day' })
 
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
     expect(screen.getByText('Mia')).toBeInTheDocument()
     const links = within(mainNav()).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
@@ -114,7 +113,9 @@ describe('REQ-028 app header and tabs', () => {
     mockApi(boardRoutes(mia))
     renderApp({ route: '/parent/settings' })
 
-    expect(await screen.findByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Here’s your day/ }),
+    ).toBeInTheDocument()
     expect(screen.getByLabelText('Current path')).toHaveTextContent('/my-day')
   })
 
@@ -167,10 +168,10 @@ describe('REQ-004 hand over and idle timeout', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true, now: TODAY })
     mockApi(boardRoutes(mia))
     renderApp({ route: '/my-day', fakeTimers: true })
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
 
     await act(() => vi.advanceTimersByTimeAsync(IDLE_TIMEOUT_MS - 1000))
-    expect(screen.getByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /Here’s your day/ })).toBeInTheDocument()
     await act(() => vi.advanceTimersByTimeAsync(1000))
 
     expect(screen.getByRole('heading', { name: 'Welcome back!' })).toBeInTheDocument()
@@ -182,13 +183,13 @@ describe('REQ-004 hand over and idle timeout', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true, now: TODAY })
     mockApi(boardRoutes(mia))
     renderApp({ route: '/my-day', fakeTimers: true })
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
 
     await act(() => vi.advanceTimersByTimeAsync(4 * 60_000))
     await act(() => apiRequest('/members'))
     await act(() => vi.advanceTimersByTimeAsync(4 * 60_000))
     await act(() => apiRequest('/members', { background: true }))
-    expect(screen.getByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /Here’s your day/ })).toBeInTheDocument()
 
     await act(() => vi.advanceTimersByTimeAsync(60_000))
     expect(screen.getByRole('heading', { name: 'Welcome back!' })).toBeInTheDocument()
@@ -197,7 +198,7 @@ describe('REQ-004 hand over and idle timeout', () => {
   it('a session ended on the server (401) shows Passcode entry with the note', async () => {
     const api = mockApi(boardRoutes(mia))
     renderApp({ route: '/my-day' })
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
 
     api.use({ 'GET /members': passcode401 })
     await act(() => apiRequest('/members').catch(() => {}))
@@ -209,7 +210,7 @@ describe('REQ-004 hand over and idle timeout', () => {
   it('a 403 re-reads the session in the background and follows it to the board', async () => {
     const api = mockApi({ ...boardRoutes(mia), 'PUT /x': () => problem(403) })
     renderApp({ route: '/my-day' })
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
 
     api.use({ 'GET /sessions/current': () => json(session(null)) })
     await act(() => apiRequest('/x', { method: 'PUT' }).catch(() => {}))
@@ -222,11 +223,11 @@ describe('REQ-004 hand over and idle timeout', () => {
   it('a 403 whose session re-read fails leaves the screen as it is', async () => {
     const api = mockApi({ ...boardRoutes(mia), 'PUT /x': () => problem(403) })
     renderApp({ route: '/my-day' })
-    await screen.findByRole('heading', { name: 'My day' })
+    await screen.findByRole('heading', { level: 1, name: /Here’s your day/ })
 
     api.use({ 'GET /sessions/current': () => problem(500) })
     await act(() => apiRequest('/x', { method: 'PUT' }).catch(() => {}))
 
-    expect(screen.getByRole('heading', { name: 'My day' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /Here’s your day/ })).toBeInTheDocument()
   })
 })

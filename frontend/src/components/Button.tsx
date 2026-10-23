@@ -3,7 +3,7 @@ import styles from './Button.module.css'
 import { Icon, type IconName } from './Icon'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'quiet'
+  variant?: 'primary' | 'secondary' | 'quiet' | 'sun'
   size?: 'sm' | 'md' | 'lg'
   icon?: IconName
   block?: boolean
