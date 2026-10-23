@@ -545,12 +545,22 @@ export interface components {
              */
             weekly_target: number | null;
             /**
+             * Target History
+             * @description Every target change, oldest first; past weeks keep theirs (REQ-017). Empty for daily habits
+             */
+            target_history: components["schemas"]["TargetChangeRead"][];
+            /**
              * Created On
              * Format: date
              */
             created_on: string;
             /** Archived */
             archived: boolean;
+            /**
+             * Archived On
+             * @description The family date it was archived; History shows no state after it
+             */
+            archived_on: string | null;
             /** Current Streak */
             current_streak: number;
             /** Best Streak */
@@ -836,6 +846,17 @@ export interface components {
              * @description In the family's timezone (ISO-8601 with offset)
              */
             created_at: string;
+        };
+        /** TargetChangeRead */
+        TargetChangeRead: {
+            /**
+             * Effective From Week
+             * Format: date
+             * @description The Monday this target counts from
+             */
+            effective_from_week: string;
+            /** Target */
+            target: number;
         };
         /** ValidationError */
         ValidationError: {

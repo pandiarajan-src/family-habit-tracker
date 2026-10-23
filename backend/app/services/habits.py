@@ -1,6 +1,7 @@
 """Habits (REQ-008, REQ-009, REQ-010) and their streak, progress and saver fields."""
 
 from dataclasses import dataclass
+from datetime import date
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -11,7 +12,7 @@ from app.domain import savers, streaks
 from app.domain.dates import week_start
 from app.domain.permissions import Action
 from app.domain.streaks import WeeklyHistory, week_check_ins
-from app.domain.weekly_targets import target_for_week
+from app.domain.weekly_targets import TargetChange, target_for_week
 from app.models import AdjustmentKind, Frequency, Habit, Member, WeeklyTarget
 from app.security.sessions import ensure_allowed, get_owned_or_404
 from app.services import adjustments
@@ -33,6 +34,8 @@ class HabitView:
 
     habit: Habit
     weekly_target: int | None
+    targets: tuple[TargetChange, ...]  # every target change, oldest first (History, REQ-017)
+    archived_on: date | None  # the family date it was archived; History stops there (REQ-009)
     current_streak: int
     best_streak: int
     streak_pending: bool
@@ -50,6 +53,8 @@ def view(ctx: Ctx, data: HabitData) -> HabitView:
     return HabitView(
         habit=data.habit,
         weekly_target=target_for_week(history.targets, ctx.today) if weekly else None,
+        targets=tuple(sorted(data.targets, key=lambda t: t.effective_from_week)) if weekly else (),
+        archived_on=as_of if archived else None,
         current_streak=streak.current,
         best_streak=streak.best,
         streak_pending=streak.pending,

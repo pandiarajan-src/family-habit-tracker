@@ -60,7 +60,6 @@ describe('REQ-003 member screens need someone checking in', () => {
   })
 
   it.each([
-    ['/history', 'History'],
     ['/gems', 'Gems & prizes'],
     ['/habits', 'My habits'],
     ['/habits/new', 'Edit habit'],

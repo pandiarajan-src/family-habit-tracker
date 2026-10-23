@@ -1,0 +1,61 @@
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 48px;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.letter {
+  font: 700 12px/16px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font: 700 13px/16px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.done {
+  background: var(--success-soft);
+}
+
+.done svg {
+  color: var(--success);
+}
+
+.saved {
+  background: var(--sun-soft);
+}
+
+.saved svg {
+  color: var(--sun-ink);
+}
+
+.not_yet {
+  background: var(--surface-sunken);
+  border: 1px dashed var(--line-strong);
+}
+
+.blank {
+  border: 1px dashed var(--line);
+  color: var(--ink-muted);
+}
+
+/* In the habit × day grid the column headers name the days. */
+@container history-card (min-width: 640px) {
+  .letter {
+    display: none;
+  }
+}

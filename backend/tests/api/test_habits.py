@@ -53,9 +53,11 @@ def test_req_008_create_daily_habit_returns_201_and_shows_from_today(
     assert body["goal_note"] == GOAL_NOTE
     assert body["frequency"] == "daily"
     assert body["weekly_target"] is None
+    assert body["target_history"] == []
     assert body["week_progress"] is None
     assert body["created_on"] == TODAY.isoformat()
     assert body["archived"] is False
+    assert body["archived_on"] is None
     listed = as_child.get(HABITS, params={"member_id": str(mia.id)}).json()
     assert [h["id"] for h in listed] == [body["id"]]
 
@@ -202,6 +204,25 @@ def test_req_009_new_weekly_target_applies_from_this_week_only(
     assert response.json()["best_streak"] == 3  # past weeks keep the target they had
 
 
+@pytest.mark.req("REQ-017")
+def test_req_017_target_history_lists_each_target_with_its_first_week(
+    as_child: TestClient, family: SeededFamily, seed: Seeder
+) -> None:
+    # History needs the target each past week had, not only this week's (REQ-017, REQ-023).
+    created = d(-21)
+    habit = seed.habit(family["Mia"], "Piano", frequency="weekly", target=3, created_on=created)
+
+    response = _patch(as_child, habit, weekly_target=5)
+
+    assert response.json()["target_history"] == [
+        {
+            "effective_from_week": (created - timedelta(days=created.weekday())).isoformat(),
+            "target": 3,
+        },
+        {"effective_from_week": (TODAY - timedelta(days=TODAY.weekday())).isoformat(), "target": 5},
+    ]
+
+
 @pytest.mark.req("REQ-009")
 def test_req_009_second_target_change_in_a_week_replaces_the_first(
     as_child: TestClient, family: SeededFamily
@@ -257,6 +278,7 @@ def test_req_009_archived_streak_is_frozen_as_time_passes(
 
     frozen = device.get(habit_path(habit)).json()
     assert frozen["current_streak"] == 3
+    assert frozen["archived_on"] == TODAY.isoformat()  # History shows no state after it
     assert frozen["saveable_periods"] == []
     act_as(device, mia)
     # An archived habit can't be checked in until it is brought back.
