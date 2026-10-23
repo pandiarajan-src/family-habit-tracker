@@ -1,6 +1,6 @@
 ---
 name: family-ux
-description: UX and accessibility rules for the family-facing frontend. Use whenever designing or building UI screens, pages, components, copy or styles — including wireframes or UI sections in specs and plans — and when writing Playwright tests that select UI elements.
+description: Load before building or changing any frontend screen, page, React component (.tsx), CSS module, button, layout or user-facing copy — and before writing Playwright tests that select UI elements or UI sections of specs and plans. UX and accessibility rules for the family app (phone-first layout, tap targets, check-off taps, labelled icons).
 ---
 
 # Family UX

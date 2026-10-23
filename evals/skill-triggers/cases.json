@@ -1,0 +1,30 @@
+{
+  "description": "Trigger evals for model-invoked project skills (.claude/skills/*, excluding disable-model-invocation ones: fix-issue, intent-to-spec). Each case runs in a fresh `claude -p` session; a positive passes if the skill loads, a near-miss passes if it does not. Other skills loading does not affect the score.",
+  "target_accuracy": 0.9,
+  "cases": [
+    {"id": "api-pos-1", "skill": "api-conventions", "should_trigger": true, "prompt": "Add a POST /api/v1/habits/{habit_id}/copy endpoint so a parent can copy one of Mia's habits to Kavi in one go.", "revised": "2026-10-23: the original prompt asked for a feature that already exists, so Claude correctly skipped the skill; see results/2026-10-23_0701_baseline"},
+    {"id": "api-pos-2", "skill": "api-conventions", "should_trigger": true, "prompt": "POST /api/v1/habits returns 200 and the raw SQLModel row right now. Clean that route up so it matches how our other routes respond."},
+    {"id": "api-pos-3", "skill": "api-conventions", "should_trigger": true, "prompt": "Can you check the API contract section of changes/0001-family-habit-tracker/spec.md for the gems endpoints? I'm not sure the status codes and schema names are right."},
+    {"id": "api-neg-1", "skill": "api-conventions", "should_trigger": false, "prompt": "Why isn't the Vite dev server forwarding /api calls to port 8000 when I run make fe-dev? I just get a blank network error."},
+    {"id": "api-neg-2", "skill": "api-conventions", "should_trigger": false, "prompt": "CI says frontend/src/api/schema.d.ts is stale. What command regenerates it?"},
+    {"id": "api-neg-3", "skill": "api-conventions", "should_trigger": false, "prompt": "Explain how app/clock.py works and how the backend tests freeze time with it."},
+    {"id": "priv-pos-1", "skill": "child-data-privacy", "should_trigger": true, "prompt": "Add a birthday field to members so we can show a cake emoji on the kids' birthdays."},
+    {"id": "priv-pos-2", "skill": "child-data-privacy", "should_trigger": true, "prompt": "Add request logging middleware to the backend that logs the method, path and which member made the call, so I can debug check-in problems."},
+    {"id": "priv-pos-3", "skill": "child-data-privacy", "should_trigger": true, "prompt": "Write an Alembic migration that adds a short optional note column to check-ins so the kids can say how it went."},
+    {"id": "priv-neg-1", "skill": "child-data-privacy", "should_trigger": false, "prompt": "make lint is failing on prettier in frontend/src/pages — can you tell me which command auto-fixes formatting?"},
+    {"id": "priv-neg-2", "skill": "child-data-privacy", "should_trigger": false, "prompt": "Bump the GitHub Actions setup-python step to the latest major version in our CI workflow."},
+    {"id": "priv-neg-3", "skill": "child-data-privacy", "should_trigger": false, "prompt": "What does the Makefile's verify target actually run, step by step?"},
+    {"id": "ux-pos-1", "skill": "family-ux", "should_trigger": true, "prompt": "Build the Gems & prizes screen from Phase 8: balance card, gem history list, and the prize list with Claim buttons.", "revised": "2026-10-23: the original prompt asked for a feature that already exists, so Claude correctly skipped the skill; see results/2026-10-23_0701_baseline"},
+    {"id": "ux-pos-2", "skill": "family-ux", "should_trigger": true, "prompt": "The tick button on My day is tiny on my phone and Kavi keeps missing it. Can you make it easier to hit?"},
+    {"id": "ux-pos-3", "skill": "family-ux", "should_trigger": true, "prompt": "Write a Playwright test that enters the family passcode, picks Mia, and checks off her 'Brush teeth' habit."},
+    {"id": "ux-neg-1", "skill": "family-ux", "should_trigger": false, "prompt": "Add lcov to the Vitest coverage reporters in vite config so we can upload to Codecov."},
+    {"id": "ux-neg-2", "skill": "family-ux", "should_trigger": false, "prompt": "After pulling main, npx tsc complains it can't find the schema.d.ts module. What usually causes that?"},
+    {"id": "ux-neg-3", "skill": "family-ux", "should_trigger": false, "prompt": "Which Node version does the frontend need, and where is it pinned?"},
+    {"id": "intent-pos-1", "skill": "write-intent", "should_trigger": true, "prompt": "Parents keep telling me they don't know which habits to start with. I'd like the app to suggest starter habits. Can we capture this as a new change?"},
+    {"id": "intent-pos-2", "skill": "write-intent", "should_trigger": true, "prompt": "Issue #31 from a parent: \"Our streaks all reset when we went on holiday to Spain.\" Let's get this started through the intent/spec/plan pipeline."},
+    {"id": "intent-pos-3", "skill": "write-intent", "should_trigger": true, "prompt": "Idea: kids could trade gems for rewards that a parent sets up, like extra screen time. Write it up so it can be reviewed before anyone builds it."},
+    {"id": "intent-neg-1", "skill": "write-intent", "should_trigger": false, "prompt": "Summarise what changes/0001-family-habit-tracker/intent.md says the MVP is for, in three bullets."},
+    {"id": "intent-neg-2", "skill": "write-intent", "should_trigger": false, "prompt": "Which phase of the 0001 plan is next, and what tasks does it include?"},
+    {"id": "intent-neg-3", "skill": "write-intent", "should_trigger": false, "prompt": "What's the difference between spec.md and plan.md in our changes folder process?"}
+  ]
+}

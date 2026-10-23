@@ -1,6 +1,6 @@
 ---
 name: api-conventions
-description: Conventions for the backend HTTP API. Use whenever creating or modifying FastAPI routes or endpoints, Pydantic request/response schemas, API error handling, or the API contract section of a spec or plan.
+description: Load before adding, changing, reviewing or proposing any backend endpoint or route (/api/v1/...), FastAPI router, Pydantic request/response schema, status code or API error — including the API contract section of a spec or plan, and when deciding whether a new endpoint is needed. Conventions for the backend HTTP API.
 ---
 
 # API conventions
