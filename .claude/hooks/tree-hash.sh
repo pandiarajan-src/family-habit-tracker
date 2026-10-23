@@ -6,7 +6,7 @@
 # Used by `make verify` (records a pass) and pre-pr-gate.py (looks it up).
 set -euo pipefail
 
-tmp=$(mktemp -d)
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/tree-hash.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
 
 # Start from a copy of the real index so unchanged files aren't re-hashed;

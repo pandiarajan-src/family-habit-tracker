@@ -24,6 +24,9 @@
       "Bash(rm -rf *)",
       "Edit(./.claude/hooks/**)",
       "Edit(./.claude/settings.json)"
+    ],
+    "ask": [
+      "Bash(dangerouslyDisableSandbox:true)"
     ]
   },
   "hooks": {
@@ -68,5 +71,45 @@
         ]
       }
     ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache/uv",
+        "~/.npm",
+        "~/Library/Caches/ms-playwright"
+      ],
+      "denyWrite": [
+        "./.env",
+        "./backend/.env",
+        "./frontend/.env",
+        "./.github/workflows",
+        "./.claude/settings.json",
+        "./.claude/hooks"
+      ],
+      "denyRead": [
+        "./.env",
+        "./backend/.env",
+        "./frontend/.env"
+      ],
+      "allowRead": [
+        "./.env.example"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "localhost",
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "registry.npmjs.org",
+        "api.osv.dev"
+      ],
+      "allowLocalBinding": true
+    }
   }
 }

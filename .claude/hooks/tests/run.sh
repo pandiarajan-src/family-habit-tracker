@@ -10,7 +10,7 @@ set -uo pipefail
 
 HOOKS="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="${HOOK_TEST_REPO:-$(git -C "$HOOKS" rev-parse --show-toplevel)}"
-TMP="$(mktemp -d)"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/hook-tests.XXXXXX")"
 TEMP_FILES=()
 cleanup() {
   rm -f "${TEMP_FILES[@]+"${TEMP_FILES[@]}"}"
