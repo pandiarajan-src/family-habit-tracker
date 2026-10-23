@@ -32,3 +32,6 @@ blob-report/
 .claude/settings.local.json
 .claude/.fix-mode
 .coverage
+
+# Skill eval runs (reports + transcripts stay local; history.jsonl is committed)
+evals/skill-triggers/results/
