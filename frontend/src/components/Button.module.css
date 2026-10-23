@@ -55,6 +55,11 @@
   padding-inline: var(--space-3);
 }
 
+.sun {
+  background: var(--sun);
+  color: var(--on-sun);
+}
+
 .quiet:hover {
   background: var(--teal-soft);
 }

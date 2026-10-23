@@ -58,6 +58,95 @@ export const copy = {
     count: (n: number) => plural(n, 'gem', 'gems'),
   },
 
+  myDay: {
+    greeting: (name: string) => `Hi ${name}! Here’s your day`,
+    yesterdayTitle: 'Yesterday',
+    whichDay: 'Which day',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    daily: 'Every day',
+    weekly: 'This week',
+    checkOff: 'Check off',
+    doneUndo: 'Done — Undo',
+    saved: 'Saved',
+    makeIt: (n: number) => `Check in today to make it ${n}!`,
+    countsFor: (day: string) => `Counts for ${day}`,
+    savedDay: (day: string) => `${day} was saved with a streak saver`,
+    weekComplete: 'Week complete — nice one!',
+    moreThisWeek: (n: number) => `${n} more this week to keep your streak going`,
+    yesterdayNoticeTitle: 'Forgot to check in yesterday?',
+    yesterdayNoticeText: (day: string) =>
+      `Check off anything you did on ${day}. Older days can be fixed by a parent.`,
+    nothingYesterday: 'None of your habits had started yet yesterday.',
+    noHabits: "You haven't added any habits yet. Add your first one in My habits!",
+    progress: 'My progress',
+    doneOn: (done: number, total: number, when: 'today' | 'yesterday') =>
+      `${done} of ${total} done ${when}`,
+    cheerAll: 'Everything done — amazing!',
+    cheerNone: 'Let’s get started!',
+    cheerSome: 'Great going — keep it up!',
+    balance: 'Balance',
+    longest: 'Longest',
+    gemRules: '1 gem for each habit you check off. 5-day and 7-day streaks earn bonus gems.',
+    saveTrouble: "We couldn't save that just now. Please try again.",
+    alreadySaved: 'That day was saved with a streak saver, so it’s already looked after.',
+    loadTrouble: "We couldn't load your day just now.",
+    tryAgain: 'Try again',
+  },
+
+  saver: {
+    title: (cost: number) => `Save your streak for ${plural(cost, 'gem', 'gems')}?`,
+    restDay: (habit: string, day: string) =>
+      `${habit} had a rest on ${day}. A streak saver keeps your streak going.`,
+    restWeek: (habit: string, monday: string) =>
+      `${habit} had a quieter week from ${monday}. A streak saver keeps your streak going.`,
+    use: 'Use a streak saver',
+    /** Screen-reader end of the button name: "Use a streak saver for Reading on Tue 14 Oct". */
+    useFor: (habit: string, period: string) => `for ${habit} on ${period}`,
+    notNow: 'Not now',
+    notNowFor: (habit: string, period: string) => `— ${habit} on ${period}`,
+    weekOf: (monday: string) => `the week of ${monday}`,
+    short: (cost: number, balance: number) =>
+      `You need ${plural(cost, 'gem', 'gems')} for this saver — keep going and you'll get there! You have ${plural(balance, 'gem', 'gems')}.`,
+    done: (period: string, cost: number) =>
+      `Streak saved! ${period} now shows “Saved”. ${plural(cost, 'gem', 'gems')} spent.`,
+    gone: "That one can't be saved any more — let's keep going from today!",
+  },
+
+  changes: {
+    someone: 'A parent',
+    aHabit: 'a habit',
+    gotIt: 'Got it',
+    /** Screen-reader end of "Got it": which notice it dismisses. */
+    gotItFor: (title: string) => `— ${title}`,
+    title: {
+      habit_created: (who: string, habit: string, day: string) => `${who} added ${habit} on ${day}`,
+      habit_updated: (who: string, habit: string, day: string) =>
+        `${who} updated ${habit} on ${day}`,
+      habit_archived: (who: string, habit: string, day: string) =>
+        `${who} archived ${habit} on ${day}`,
+      habit_deleted: (who: string, habit: string, day: string) =>
+        `${who} removed ${habit} on ${day}`,
+      check_in_added: (who: string, habit: string, day: string) =>
+        `${who} updated ${habit} for ${day}`,
+      check_in_removed: (who: string, habit: string, day: string) =>
+        `${who} updated ${habit} for ${day}`,
+      streak_saver_used: (who: string, habit: string, day: string) =>
+        `${who} saved your streak on ${habit} for ${day}`,
+      pin_reset: (who: string, _habit: string, day: string) => `${who} reset your PIN on ${day}`,
+    },
+    text: {
+      habit_created: 'It’s on your list now.',
+      habit_updated: 'Its details changed.',
+      habit_archived: 'It’s put away for now, and its history is kept.',
+      habit_deleted: 'It’s gone from your list.',
+      check_in_added: 'A check-in was added for that day.',
+      check_in_removed: 'A check-in was taken off that day.',
+      streak_saver_used: 'Some of your gems paid for a streak saver.',
+      pin_reset: 'Use your new PIN next time you check in.',
+    },
+  },
+
   pin: {
     title: (name: string) => `Enter ${name}’s PIN`,
     progress: (filled: number, length: number) => `${filled} of ${length} digits entered`,

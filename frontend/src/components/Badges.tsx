@@ -23,12 +23,15 @@ export function StreakBadge({
   )
 }
 
-/** Gem + count ("24 gems"). */
-export function GemBadge({ count }: { count: number }) {
+/** Gem + count ("24 gems", or "Balance 24 gems" with a prefix). */
+export function GemBadge({ count, prefix }: { count: number; prefix?: string }) {
   return (
     <span className={styles.gems}>
       <GemIcon />
-      <span>{copy.gems.count(count)}</span>
+      <span>
+        {prefix && <span className={styles.prefix}>{prefix} </span>}
+        {copy.gems.count(count)}
+      </span>
     </span>
   )
 }

@@ -14,6 +14,10 @@
   border: 1px solid var(--line);
 }
 
+.sun {
+  background: var(--sun-soft);
+}
+
 .icon {
   flex: none;
   display: grid;
@@ -23,6 +27,10 @@
   border-radius: 50%;
   background: var(--surface-raised);
   color: var(--teal-ink);
+}
+
+.sun .icon {
+  color: var(--sun-ink);
 }
 
 .caution .icon {

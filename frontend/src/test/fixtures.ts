@@ -95,12 +95,16 @@ export function session(acting: MemberRead | null = null): SessionRead {
   return { family_id: FAMILY_ID, acting_member: acting, expires_at: '2026-10-20T10:05:00+01:00' }
 }
 
-/** The reads every signed-in board needs, for a device where `acting` is checking in. */
+/** The reads the board and My day need, for a device where `acting` is checking in. */
 export function boardRoutes(acting: MemberRead | null = null): Routes {
   return {
     'GET /sessions/current': () => json(session(acting)),
     'GET /members': () => json(members),
     'GET /habits': () => json(allHabits),
     'GET /families/current': () => json(family),
+    // My day (the screen a member lands on) also reads these.
+    'GET /adjustments': () => json([]),
+    'GET /check-ins': () => json([]),
+    'GET /streak-savers': () => json([]),
   }
 }
