@@ -4,7 +4,10 @@ import type {
   AdjustmentRead,
   CheckInRead,
   FamilyRead,
+  HabitCreate,
   HabitRead,
+  HabitUpdate,
+  MemberCredentialUpdate,
   MemberRead,
   SessionRead,
   StreakSaverRead,
@@ -55,6 +58,21 @@ export const api = {
     options: ReadOptions = {},
     params: { member_id?: string; include_archived?: boolean } = {},
   ) => apiRequest<HabitRead[]>(`/habits${query(params)}`, options),
+
+  getHabit: (habitId: string, options: ReadOptions = {}) =>
+    apiRequest<HabitRead>(`/habits/${habitId}`, options),
+
+  createHabit: (body: HabitCreate) => apiRequest<HabitRead>('/habits', { method: 'POST', body }),
+
+  /** Rename, change the goal or target, archive (`archived: true`) or bring back (REQ-009). */
+  updateHabit: (habitId: string, body: HabitUpdate) =>
+    apiRequest<HabitRead>(`/habits/${habitId}`, { method: 'PATCH', body }),
+
+  deleteHabit: (habitId: string) => apiRequest<void>(`/habits/${habitId}`, { method: 'DELETE' }),
+
+  /** Your own PIN needs `current_pin`; a wrong one is a 401 `MemberPIN` (REQ-005, C14). */
+  setPin: (memberId: string, body: MemberCredentialUpdate) =>
+    apiRequest<void>(`/members/${memberId}/credentials`, { method: 'PUT', body }),
 
   listCheckIns: (range: Range, options: ReadOptions = {}) =>
     apiRequest<CheckInRead[]>(`/check-ins${query({ ...range })}`, options),

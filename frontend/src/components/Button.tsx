@@ -1,12 +1,13 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 import styles from './Button.module.css'
 import { Icon, type IconName } from './Icon'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'quiet' | 'sun'
+  variant?: 'primary' | 'secondary' | 'quiet' | 'sun' | 'danger' | 'dangerOutline'
   size?: 'sm' | 'md' | 'lg'
   icon?: IconName
   block?: boolean
+  ref?: Ref<HTMLButtonElement>
 }
 
 /** The design system's button: at least 44px tall [family-ux #2], icon always beside a label. */

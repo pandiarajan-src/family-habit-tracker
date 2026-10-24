@@ -1,0 +1,88 @@
+.back {
+  align-self: flex-start;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font: 800 22px/28px var(--font-sans);
+}
+
+.lead,
+.empty {
+  font: 500 16px/24px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* One row from tablet width; at 360px the button wraps under the text. */
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.resting {
+  background: var(--surface-sunken);
+  border: 1px dashed var(--line-strong);
+  box-shadow: none;
+}
+
+.body {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font: 800 18px/24px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font: 600 15px/22px var(--font-sans);
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.pinNote {
+  flex: 1 1 220px;
+  font: 700 16px/24px var(--font-sans);
+}

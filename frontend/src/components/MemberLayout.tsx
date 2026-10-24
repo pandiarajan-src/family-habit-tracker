@@ -11,7 +11,7 @@ const MEMBER_TABS: TabItem[] = [
   { to: '/my-day', label: copy.tabs.myDay, icon: 'home' },
   { to: '/history', label: copy.tabs.history, icon: 'calendar' },
   { to: '/gems', label: copy.tabs.gems, icon: 'gift' },
-  { to: '/habits', label: copy.tabs.habits, icon: 'list' },
+  { to: '/habits', label: copy.tabs.habits, icon: 'list', also: ['/my-pin'] },
 ]
 const PARENT_TAB: TabItem = { to: '/parent', label: copy.tabs.parent, icon: 'shield' }
 

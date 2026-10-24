@@ -1,0 +1,50 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font: 700 15px/20px var(--font-sans);
+}
+
+.labelNote {
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+/* Inputs and selects share one look; at least 48px tall [family-ux #2]. */
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 500 16px/24px var(--font-sans);
+}
+
+.hasError .input {
+  border-color: var(--danger);
+}
+
+.hint {
+  font: 600 13px/18px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.error {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font: 700 14px/20px var(--font-sans);
+  color: var(--ink);
+}
+
+.error svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--danger);
+}
