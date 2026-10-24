@@ -3,12 +3,16 @@ import { apiRequest, type RequestOptions } from './client'
 import type {
   AdjustmentRead,
   CheckInRead,
+  ClaimStatus,
   FamilyRead,
+  GemTransactionRead,
   HabitCreate,
   HabitRead,
   HabitUpdate,
   MemberCredentialUpdate,
   MemberRead,
+  PrizeClaimRead,
+  PrizeRead,
   SessionRead,
   StreakSaverRead,
 } from './types'
@@ -101,4 +105,23 @@ export const api = {
       method: 'PATCH',
       body: { acknowledged: true },
     }),
+
+  /** Earnings (derived) and spends, newest first; the last 12 months by default (REQ-021). */
+  listGemTransactions: (memberId: string, options: ReadOptions = {}) =>
+    apiRequest<GemTransactionRead[]>(`/members/${memberId}/gem-transactions`, options),
+
+  listPrizes: (options: ReadOptions = {}) => apiRequest<PrizeRead[]>('/prizes', options),
+
+  listClaims: (
+    options: ReadOptions = {},
+    params: { member_id?: string; status?: ClaimStatus } = {},
+  ) => apiRequest<PrizeClaimRead[]>(`/prize-claims${query(params)}`, options),
+
+  /** Holds the cost from the balance; 409 when it's more than the member has (REQ-025). */
+  claimPrize: (prizeId: string) =>
+    apiRequest<PrizeClaimRead>('/prize-claims', { method: 'POST', body: { prize_id: prizeId } }),
+
+  /** The claimant cancels; parents approve or decline (REQ-025, REQ-026). */
+  decideClaim: (claimId: string, status: Exclude<ClaimStatus, 'pending'>) =>
+    apiRequest<PrizeClaimRead>(`/prize-claims/${claimId}`, { method: 'PATCH', body: { status } }),
 }

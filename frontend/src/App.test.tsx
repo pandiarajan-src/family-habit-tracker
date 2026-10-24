@@ -58,17 +58,6 @@ describe('REQ-003 member screens need someone checking in', () => {
     expect(await screen.findByRole('heading', { name: "Who's checking in?" })).toBeInTheDocument()
     expect(screen.getByLabelText('Current path')).toHaveTextContent(/^\/$/)
   })
-
-  it.each([['/gems', 'Gems & prizes']])(
-    '%s is registered for later phases',
-    async (route, title) => {
-      mockApi(boardRoutes(mia))
-      renderApp({ route })
-
-      expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument()
-      expect(screen.getByText('This screen is on its way')).toBeInTheDocument()
-    },
-  )
 })
 
 describe('REQ-028 app header and tabs', () => {

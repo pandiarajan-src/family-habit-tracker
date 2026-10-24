@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest'
 import type { AdjustmentKind, AdjustmentRead, CheckInRead, StreakSaverRead } from '../api/types'
 import { copy } from '../copy'
 import { habit, mia, mum, TIMEZONE, weekly } from '../test/fixtures'
-import { changeNotices, habitDays, periodLabel, saverOffer, summarizeDay } from './myDay'
+import {
+  changeNotices,
+  describeChanges,
+  habitDays,
+  periodLabel,
+  saverOffer,
+  summarizeDay,
+} from './myDay'
 
 const TODAY = '2026-10-20'
 const YESTERDAY = '2026-10-19'
@@ -197,5 +204,21 @@ describe('REQ-015 change notices', () => {
     expect(changeNotices([late], [mum], [reading], 'Pacific/Auckland')[0].title).toBe(
       'Mum updated Reading on Thu 15 Oct',
     )
+  })
+
+  it('"Changes to my habits" keeps dismissed ones, with the parent’s avatar and the day', () => {
+    const list = [
+      adjustment('check_in_added', {
+        date: '2026-10-14',
+        acknowledged_at: '2026-10-20T08:00:00+01:00',
+      }),
+      adjustment('pin_reset', { habit_id: null, actor_member_id: null }),
+    ]
+    const lines = describeChanges(list, [mum, mia], [reading], TIMEZONE)
+    expect(lines.map((x) => [x.title, x.actorEmoji, x.madeOn, x.acknowledged])).toEqual([
+      [`A parent reset your PIN on ${lines[0].madeOn}`, null, lines[0].madeOn, false],
+      ['Mum updated Reading for Wed 14 Oct', '🌻', lines[1].madeOn, true],
+    ])
+    expect(lines[1].madeOn).toMatch(/^\w{3} \d{1,2} Oct$/)
   })
 })

@@ -166,6 +166,8 @@ def gem_history(ctx: Ctx, member_id: UUID, start: date, end: date) -> list[Histo
         select(GemTransaction, StreakSaver.habit_id)
         .outerjoin(StreakSaver, col(StreakSaver.id) == col(GemTransaction.streak_saver_id))
         .where(GemTransaction.member_id == member_id)
+        # Latest first, so the stable sort below keeps same-day spends newest first.
+        .order_by(col(GemTransaction.created_at).desc(), col(GemTransaction.id))
     )
     events += [
         HistoryEvent(
