@@ -1,0 +1,90 @@
+{
+  "about": "History day and week states (REQ-023, REQ-017, C13, C19, C21). Read by backend/tests/unit/test_day_states_shared.py (app/domain/day_states.py) and frontend/src/lib/dayStates.test.ts (lib/dayStates.ts), so the server and the History screen agree. Today is Tue 20 Oct 2026.",
+  "today": "2026-10-20",
+  "cases": [
+    {
+      "name": "daily: done, saved, not yet, today pending, future blank",
+      "frequency": "daily",
+      "created_on": "2026-09-01",
+      "done": ["2026-10-17", "2026-10-19"],
+      "saved": ["2026-10-18"],
+      "targets": [],
+      "days": {
+        "2026-10-16": "not_yet",
+        "2026-10-17": "done",
+        "2026-10-18": "saved",
+        "2026-10-19": "done",
+        "2026-10-20": "not_yet",
+        "2026-10-21": null
+      },
+      "weeks": {}
+    },
+    {
+      "name": "daily: today is never saved; no state before the habit existed",
+      "frequency": "daily",
+      "created_on": "2026-10-15",
+      "done": ["2026-10-19"],
+      "saved": ["2026-10-20"],
+      "targets": [],
+      "days": {
+        "2026-10-14": null,
+        "2026-10-15": "not_yet",
+        "2026-10-20": "not_yet"
+      },
+      "weeks": {}
+    },
+    {
+      "name": "weekly: days only done or not yet; complete, saved, below target, in progress, coming up",
+      "frequency": "weekly",
+      "created_on": "2026-09-07",
+      "done": ["2026-09-28", "2026-10-05", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-19"],
+      "saved": ["2026-10-05"],
+      "targets": [{ "effective_from_week": "2026-09-07", "target": 3 }],
+      "days": {
+        "2026-10-05": "done",
+        "2026-10-06": "not_yet",
+        "2026-10-12": "done",
+        "2026-10-20": "not_yet",
+        "2026-10-22": null
+      },
+      "weeks": {
+        "2026-08-31": null,
+        "2026-09-28": { "kind": "below_target", "done": 1, "target": 3 },
+        "2026-10-05": { "kind": "saved", "done": 1, "target": 3 },
+        "2026-10-12": { "kind": "complete", "done": 3, "target": 3 },
+        "2026-10-19": { "kind": "in_progress", "done": 1, "target": 3 },
+        "2026-10-26": { "kind": "coming_up", "done": 0, "target": 3 }
+      }
+    },
+    {
+      "name": "weekly: 5 of 3 shows as 3 of 3; each week keeps the target it had; complete beats saved",
+      "frequency": "weekly",
+      "created_on": "2026-09-07",
+      "done": [
+        "2026-09-28",
+        "2026-09-29",
+        "2026-09-30",
+        "2026-10-01",
+        "2026-10-02",
+        "2026-10-05",
+        "2026-10-06",
+        "2026-10-07",
+        "2026-10-12",
+        "2026-10-13",
+        "2026-10-19"
+      ],
+      "saved": ["2026-10-05"],
+      "targets": [
+        { "effective_from_week": "2026-10-19", "target": 1 },
+        { "effective_from_week": "2026-09-07", "target": 3 }
+      ],
+      "days": {},
+      "weeks": {
+        "2026-09-28": { "kind": "complete", "done": 3, "target": 3 },
+        "2026-10-05": { "kind": "complete", "done": 3, "target": 3 },
+        "2026-10-12": { "kind": "below_target", "done": 2, "target": 3 },
+        "2026-10-19": { "kind": "complete", "done": 1, "target": 1 }
+      }
+    }
+  ]
+}

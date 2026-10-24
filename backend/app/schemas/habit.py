@@ -20,6 +20,11 @@ class WeekProgressRead(BaseModel):
     complete: bool
 
 
+class TargetChangeRead(BaseModel):
+    effective_from_week: date = Field(description="The Monday this target counts from")
+    target: int
+
+
 class HabitRead(BaseModel):
     id: UUID
     member_id: UUID
@@ -27,8 +32,15 @@ class HabitRead(BaseModel):
     goal_note: str | None
     frequency: Frequency
     weekly_target: int | None = Field(description="This week's target; null for daily habits")
+    target_history: list[TargetChangeRead] = Field(
+        description="Every target change, oldest first; past weeks keep theirs (REQ-017). "
+        "Empty for daily habits"
+    )
     created_on: date
     archived: bool
+    archived_on: date | None = Field(
+        description="The family date it was archived; History shows no state after it"
+    )
     current_streak: int
     best_streak: int
     streak_pending: bool = Field(
@@ -56,8 +68,13 @@ class HabitRead(BaseModel):
             goal_note=habit.goal_note,
             frequency=habit.frequency,
             weekly_target=v.weekly_target,
+            target_history=[
+                TargetChangeRead(effective_from_week=t.effective_from_week, target=t.target)
+                for t in v.targets
+            ],
             created_on=habit.created_on,
             archived=habit.archived_at is not None,
+            archived_on=v.archived_on,
             current_streak=v.current_streak,
             best_streak=v.best_streak,
             streak_pending=v.streak_pending,

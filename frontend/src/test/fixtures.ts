@@ -36,8 +36,10 @@ export function habit(owner: MemberRead, overrides: Partial<HabitRead> = {}): Ha
     goal_note: null,
     frequency: 'daily',
     weekly_target: null,
+    target_history: [],
     created_on: '2026-09-01',
     archived: false,
+    archived_on: null,
     current_streak: 0,
     best_streak: 0,
     streak_pending: false,
@@ -58,6 +60,7 @@ export function weekly(
   return habit(owner, {
     frequency: 'weekly',
     weekly_target: target,
+    target_history: [{ effective_from_week: '2026-08-31', target }],
     week_progress: { done, target, complete: done >= target },
     ...overrides,
   })
