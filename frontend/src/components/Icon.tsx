@@ -25,6 +25,7 @@ const PATHS = {
   people:
     'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M18 14.5a6 6 0 0 1 4 5.5v1',
   sparkle: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6',
+  signOut: 'M14 4H5v16h9M10 12h10M17 9l3 3-3 3',
 } as const
 
 export type IconName = keyof typeof PATHS

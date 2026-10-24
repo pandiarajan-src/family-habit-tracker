@@ -111,11 +111,14 @@ describe('REQ-028 app header and tabs', () => {
     expect(await screen.findByText('Dad (parent)')).toBeInTheDocument()
     await user.click(within(mainNav()).getByRole('link', { name: 'Parent' }))
 
-    expect(await screen.findByRole('heading', { name: 'Approvals & prizes' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Parent' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Waiting for a decision (0)' }),
+    ).toBeInTheDocument()
     expect(screen.getByLabelText('Current path')).toHaveTextContent('/parent/approvals')
     const sections = screen.getByRole('navigation', { name: 'Parent' })
     await user.click(within(sections).getByRole('link', { name: 'Family settings' }))
-    expect(await screen.findByRole('heading', { name: 'Family settings' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Family members' })).toBeInTheDocument()
     expect(within(mainNav()).getByRole('link', { name: 'Parent' })).toHaveAttribute(
       'aria-current',
       'page',

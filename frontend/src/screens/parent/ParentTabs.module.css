@@ -1,11 +1,15 @@
-.wrap {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: var(--space-6) var(--gutter) 0;
+/* Title and section switch side by side when there's room; stacked at 360px. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .sections {
   display: flex;
+  flex: 0 1 30rem;
   gap: 4px;
   max-width: 100%;
   padding: 4px;

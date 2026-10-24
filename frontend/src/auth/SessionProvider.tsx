@@ -62,6 +62,11 @@ export function SessionProvider({ children, idleTimeoutMs }: Props) {
       unlock: async (passcode) => activate(await api.createSession(passcode)),
       chooseMember: async (memberId, pin) => activate(await api.chooseMember(memberId, pin)),
       switchPerson: async () => activate(await api.switchPerson()),
+      signOut: async () => {
+        await api.signOut()
+        setState({ status: 'signed-out', reason: null })
+      },
+      refresh: async () => activate(await api.getSession()),
     }),
     [state, activate],
   )

@@ -12,7 +12,15 @@
 }
 
 .text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   font: 500 16px/24px var(--font-sans);
+}
+
+.text ul {
+  margin: 0;
+  padding-left: 1.25em;
 }
 
 .actions {

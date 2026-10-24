@@ -57,9 +57,9 @@ export function ConfirmDialog({
       <h2 id={titleId} className={styles.title}>
         {title}
       </h2>
-      <p id={textId} className={styles.text}>
+      <div id={textId} className={styles.text}>
         {children}
-      </p>
+      </div>
       <div className={styles.actions}>
         <Button variant="danger" icon={confirmIcon} onClick={onConfirm} disabled={busy}>
           {confirmLabel}

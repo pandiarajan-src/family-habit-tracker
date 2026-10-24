@@ -261,3 +261,8 @@
   gap: var(--space-4);
   align-items: start;
 }
+
+.hint {
+  font: 600 15px/22px var(--font-sans);
+  color: var(--ink-muted);
+}

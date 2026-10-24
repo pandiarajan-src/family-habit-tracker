@@ -8,6 +8,7 @@ import {
   canGoBack,
   canGoForward,
   cellLabel,
+  correctable,
   checkInCount,
   dayCell,
   daysOf,
@@ -178,5 +179,18 @@ describe('REQ-009 / REQ-023 habits and totals for a period', () => {
     expect(label('2026-10-15')).toBe('Not yet')
     expect(label('2026-10-17')).toBe('Put away')
     expect(label('2026-10-21')).toBe('Coming up')
+  })
+})
+
+describe('REQ-014 days a parent can correct', () => {
+  const reading = habit(kavi)
+  it('Done and Not yet days, but not Saved or blank ones, and never on an archived habit', () => {
+    expect(correctable(reading, { kind: 'state', state: 'done' })).toBe(true)
+    expect(correctable(reading, { kind: 'state', state: 'not_yet' })).toBe(true)
+    expect(correctable(reading, { kind: 'state', state: 'saved' })).toBe(false)
+    expect(correctable(reading, { kind: 'blank', reason: 'later' })).toBe(false)
+    expect(correctable({ ...reading, archived: true }, { kind: 'state', state: 'done' })).toBe(
+      false,
+    )
   })
 })

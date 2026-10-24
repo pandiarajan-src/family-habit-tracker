@@ -358,9 +358,153 @@ export const copy = {
   },
 
   parent: {
+    title: 'Parent',
     sections: 'Parent',
     approvals: 'Approvals & prizes',
     settings: 'Family settings',
+    cancel: 'Cancel',
+    saving: 'Saving…',
+    trouble: "We couldn't do that just now. Please try again.",
+    loadTrouble: "We couldn't load this just now.",
+    tryAgain: 'Try again',
+  },
+
+  approvals: {
+    waiting: (n: number) => `Waiting for a decision (${n})`,
+    nothingWaiting: 'Nothing is waiting right now.',
+    you: 'You',
+    claimTitle: (who: string, prize: string) => `${who} · ${prize}`,
+    claimMeta: (cost: number, day: string) => `${plural(cost, 'gem', 'gems')} held · asked ${day}`,
+    approve: (who: string, prize: string) => `Approve ${who}’s ${prize}`,
+    approveOwn: (prize: string) => `Approve your ${prize}`,
+    decline: 'Not this time',
+    /** Screen-reader end of "Not this time": which claim it declines. */
+    declineFor: (who: string, prize: string) => `for ${who}’s ${prize}`,
+    declineOwnFor: (prize: string) => `for your ${prize}`,
+    waitingOther: 'Waiting for the other parent',
+    twoParents: (other: string) =>
+      `Your own claims are decided by ${other}, and ${other}’s by you.`,
+    manyParents: 'Your own claims are decided by another parent.',
+    onlyParent: 'You’re the only parent in this family, so you can decide your own claims too.',
+    approved: (who: string, prize: string) => `${who}’s ${prize} is approved. Enjoy!`,
+    approvedOwn: (prize: string) => `Your ${prize} is approved. Enjoy!`,
+    declined: (who: string, prize: string) =>
+      `Not this time for ${who}’s ${prize}. The gems are back with ${who}.`,
+    declinedOwn: (prize: string) => `Not this time for your ${prize}. Your gems are back.`,
+    alreadyDecided: 'That claim was already decided, so the list is up to date now.',
+    aMember: 'A family member',
+  },
+
+  prizes: {
+    title: 'Prizes',
+    none: 'No prizes yet. Add the first one below!',
+    edit: 'Edit',
+    delete: 'Delete',
+    /** Screen-reader end of "Edit" / "Delete": which prize. */
+    forPrize: (prize: string) => prize,
+    claimWaiting: 'Has a claim waiting — decide it before deleting.',
+    addTitle: 'Add a prize',
+    editTitle: (prize: string) => `Edit ${prize}`,
+    name: 'Prize name',
+    nameHint: 'Up to 40 characters',
+    nameEmpty: 'Give the prize a name',
+    cost: 'Gem cost',
+    costHint: 'A whole number from 1 to 10,000',
+    add: 'Add prize',
+    save: 'Save prize',
+    added: (prize: string) => `${prize} is on everyone’s prize list.`,
+    saved: (prize: string) => `${prize} is saved. Claims already waiting keep their cost.`,
+    deleted: (prize: string) => `${prize} is deleted. Past claims keep its name and cost.`,
+    confirmTitle: (prize: string) => `Delete ${prize}?`,
+    confirmText: 'It comes off everyone’s prize list. Past claims keep its name and cost.',
+    confirmYes: (prize: string) => `Yes, delete ${prize}`,
+    confirmNo: (prize: string) => `Keep ${prize}`,
+    stillWaiting: (prize: string) =>
+      `A claim for ${prize} is waiting now — decide it first, then delete.`,
+  },
+
+  settings: {
+    membersTitle: 'Family members',
+    addMember: 'Add a member',
+    roles: { parent: 'Parent', child: 'Child' },
+    thatsYou: (role: string) => `${role} · that’s you`,
+    edit: 'Edit',
+    remove: 'Remove',
+    /** Screen-reader end of "Edit" / "Remove": who. */
+    forMember: (name: string) => name,
+    resetPin: (name: string) => `Reset ${name}’s PIN`,
+    habits: (name: string) => `${name}’s habits`,
+    needsParent: 'A family always needs at least one parent.',
+    // Member form (REQ-006).
+    addTitle: 'Add a member',
+    editTitle: (name: string) => `Edit ${name}`,
+    nickname: 'Nickname',
+    nicknameHint: 'Up to 20 characters. No surnames needed.',
+    nicknameEmpty: 'Give them a nickname',
+    nicknameTaken: 'Someone in the family already has that nickname — try another one',
+    avatar: 'Avatar',
+    avatarHint: 'One emoji, like 🦊 or 🚀',
+    avatarWrong: 'Pick just one emoji',
+    role: 'Role',
+    pin: 'First PIN',
+    pinHint: 'Exactly 4 numbers. Share it with them, and they can change it in My PIN.',
+    pinFormat: 'The PIN needs exactly 4 numbers',
+    roleFixed: 'The only parent stays a parent.',
+    save: 'Save',
+    add: 'Add member',
+    added: (name: string) => `${name} is in the family! They can check in with their PIN now.`,
+    saved: (name: string) => `${name} is saved.`,
+    notSaved: 'That didn’t save — check the nickname is new and the avatar is one emoji.',
+    // Reset a child's PIN (REQ-005).
+    resetTitle: (name: string) => `New PIN for ${name}`,
+    newPin: 'New PIN',
+    newPinHint: 'Exactly 4 numbers',
+    again: 'Type the new PIN again',
+    mismatch: 'Those two PINs don’t match yet — try typing the new one again',
+    savePin: (name: string) => `Save ${name}’s PIN`,
+    pinSaved: (name: string) =>
+      `${name}’s new PIN is saved, and any PIN break is over. ${name} will see a note on My day.`,
+    // Remove a member (REQ-007).
+    removeTitle: (name: string) => `Remove ${name} from the family?`,
+    removeLead: (name: string) => `This deletes everything about ${name} for good:`,
+    removeHabits: (n: number) =>
+      n === 0 ? 'Every habit and check-in' : `${plural(n, 'habit', 'habits')} and every check-in`,
+    removeSavers: 'All streak savers',
+    removeGems: (n: number) => `Gem history and a balance of ${plural(n, 'gem', 'gems')}`,
+    removeClaims: 'Prize claims, waiting or decided',
+    removePin: (name: string) => `${name}’s PIN`,
+    removeNotes: (name: string) => `Notes about changes parents made for ${name}`,
+    removeKeeps: (name: string) =>
+      `Things ${name} did for others, like approvals, stay and show “a family member”.`,
+    removeYes: (name: string) => `Yes, remove ${name}`,
+    removeNo: (name: string) => `Keep ${name}`,
+    removed: (name: string) => `${name} is removed from the family.`,
+    // Timezone (REQ-027).
+    dayTitle: 'Our day and week',
+    timezone: 'Family timezone',
+    timezoneHint:
+      '“Today” and Monday-to-Sunday weeks follow this. Past check-ins keep their dates.',
+    otherZones: 'Other',
+    saveTimezone: 'Save timezone',
+    timezoneSaved: (zone: string) => `Saved! Days and weeks now follow ${zone}.`,
+    timezoneWrong: 'That timezone didn’t save — try a nearby city instead.',
+    // This device (REQ-002).
+    deviceTitle: 'This device',
+    deviceText:
+      'Signing out means the family passcode is needed again here. Use it when a tablet or laptop leaves home.',
+    signOut: 'Sign this device out',
+  },
+
+  correction: {
+    /** History, parent only: the accessible name of a child's day (REQ-014). */
+    add: (day: string, state: string, habit: string) =>
+      `${day}: ${state} — add a check-in for ${habit}`,
+    remove: (day: string, state: string, habit: string) =>
+      `${day}: ${state} — take off the check-in for ${habit}`,
+    hint: 'Tap a day on a child’s habit to add or take off a check-in. The child will see a note on My day.',
+    done: (name: string, habit: string, day: string) =>
+      `${name}’s ${habit} for ${day} is updated. ${name} will see a note on My day.`,
+    trouble: "We couldn't change that day just now. Please try again.",
   },
 
   screens: {
@@ -371,10 +515,5 @@ export const copy = {
     myPin: 'My PIN',
     approvals: 'Approvals & prizes',
     settings: 'Family settings',
-  },
-
-  comingSoon: {
-    title: 'This screen is on its way',
-    text: 'It will be ready soon. Your check-ins, streaks and gems are safe.',
   },
 } as const
