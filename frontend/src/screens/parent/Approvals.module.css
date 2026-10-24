@@ -1,0 +1,132 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font: 800 22px/28px var(--font-sans);
+}
+
+.empty,
+.note {
+  font: 500 15px/22px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+/* Claim cards: two across from tablet width, one column at 360px [family-ux #1]. */
+.claims {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.claim,
+.prize,
+.addCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--sun-soft);
+  font-size: 26px;
+}
+
+.claimTitle,
+.prizeTitle {
+  font: 800 18px/24px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font: 600 14px/20px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.decide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.waitingOther {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font: 700 15px/20px var(--font-sans);
+}
+
+.prizes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prize {
+  padding: var(--space-4) 20px;
+}
+
+/* Name and cost beside the buttons when there's room; buttons wrap below at 360px. */
+.prizeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.prizeInfo {
+  flex: 1 1 14rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cost {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 15px/20px var(--font-sans);
+}
+
+.prizeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.addCard {
+  margin-top: var(--space-3);
+}

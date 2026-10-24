@@ -7,11 +7,15 @@ const SECTIONS = [
   { to: '/parent/settings', label: copy.parent.settings },
 ]
 
-/** The Parent tab: "Approvals & prizes | Family settings" (spec §5, C15). */
+/**
+ * The Parent tab (parents only, REQ-028): the page with its "Parent" heading and the switch
+ * between "Approvals & prizes" and "Family settings" (spec §5, C15). The section is the Outlet.
+ */
 export function ParentTabs() {
   return (
-    <>
-      <div className={styles.wrap}>
+    <main className="page">
+      <div className={styles.head}>
+        <h1 className="page-title">{copy.parent.title}</h1>
         <nav className={styles.sections} aria-label={copy.parent.sections}>
           {SECTIONS.map((section) => (
             <NavLink
@@ -25,6 +29,6 @@ export function ParentTabs() {
         </nav>
       </div>
       <Outlet />
-    </>
+    </main>
   )
 }

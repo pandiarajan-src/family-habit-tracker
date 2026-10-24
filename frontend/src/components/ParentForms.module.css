@@ -1,0 +1,41 @@
+/* Shared by the Parent tab's inline forms: prize, member and PIN reset. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.formTitle {
+  font: 800 20px/26px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fixed {
+  font: 700 16px/24px var(--font-sans);
+}
+
+.emoji {
+  max-width: 8rem;
+  font-size: 24px;
+}
+
+.trouble {
+  font: 700 15px/22px var(--font-sans);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

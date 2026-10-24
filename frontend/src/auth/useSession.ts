@@ -16,6 +16,10 @@ export interface SessionContextValue {
   chooseMember: (memberId: string, pin: string) => Promise<void>
   /** "Done — switch person": clears the acting member (REQ-004). */
   switchPerson: () => Promise<void>
+  /** "Sign this device out" (parents): ends the family session, back to Passcode entry (REQ-002). */
+  signOut: () => Promise<void>
+  /** Re-reads the session, e.g. after the acting member edits or removes themselves. */
+  refresh: () => Promise<void>
 }
 
 export const SessionContext = createContext<SessionContextValue | null>(null)

@@ -5,14 +5,19 @@ import type {
   CheckInRead,
   ClaimStatus,
   FamilyRead,
+  FamilyUpdate,
   GemTransactionRead,
   HabitCreate,
   HabitRead,
   HabitUpdate,
+  MemberCreate,
   MemberCredentialUpdate,
   MemberRead,
+  MemberUpdate,
   PrizeClaimRead,
+  PrizeCreate,
   PrizeRead,
+  PrizeUpdate,
   SessionRead,
   StreakSaverRead,
 } from './types'
@@ -54,9 +59,28 @@ export const api = {
       body: { acting_member_id: null },
     }),
 
+  /** "Sign this device out" (parents only): the cookie stops working everywhere (REQ-002). */
+  signOut: () => apiRequest<void>('/sessions/current', { method: 'DELETE' }),
+
   getFamily: (options: ReadOptions = {}) => apiRequest<FamilyRead>('/families/current', options),
 
+  /** A bad IANA name is a 422; past check-ins keep their dates (REQ-027). */
+  updateFamily: (body: FamilyUpdate) =>
+    apiRequest<FamilyRead>('/families/current', { method: 'PATCH', body }),
+
   listMembers: (options: ReadOptions = {}) => apiRequest<MemberRead[]>('/members', options),
+
+  /** Parents only; a duplicate nickname or a bad emoji is a 422 (REQ-006). */
+  createMember: (body: MemberCreate) =>
+    apiRequest<MemberRead>('/members', { method: 'POST', body }),
+
+  /** Demoting the last parent is a 422 (REQ-006). */
+  updateMember: (memberId: string, body: MemberUpdate) =>
+    apiRequest<MemberRead>(`/members/${memberId}`, { method: 'PATCH', body }),
+
+  /** Deletes everything the member owns; the last parent is a 422 (REQ-007). */
+  deleteMember: (memberId: string) =>
+    apiRequest<void>(`/members/${memberId}`, { method: 'DELETE' }),
 
   listHabits: (
     options: ReadOptions = {},
@@ -74,7 +98,10 @@ export const api = {
 
   deleteHabit: (habitId: string) => apiRequest<void>(`/habits/${habitId}`, { method: 'DELETE' }),
 
-  /** Your own PIN needs `current_pin`; a wrong one is a 401 `MemberPIN` (REQ-005, C14). */
+  /**
+   * Your own PIN needs `current_pin`; a wrong one is a 401 `MemberPIN` (REQ-005, C14).
+   * A parent resets a child's without it.
+   */
   setPin: (memberId: string, body: MemberCredentialUpdate) =>
     apiRequest<void>(`/members/${memberId}/credentials`, { method: 'PUT', body }),
 
@@ -111,6 +138,15 @@ export const api = {
     apiRequest<GemTransactionRead[]>(`/members/${memberId}/gem-transactions`, options),
 
   listPrizes: (options: ReadOptions = {}) => apiRequest<PrizeRead[]>('/prizes', options),
+
+  createPrize: (body: PrizeCreate) => apiRequest<PrizeRead>('/prizes', { method: 'POST', body }),
+
+  /** A new cost doesn't change pending claims (REQ-024). */
+  updatePrize: (prizeId: string, body: PrizeUpdate) =>
+    apiRequest<PrizeRead>(`/prizes/${prizeId}`, { method: 'PATCH', body }),
+
+  /** 409 while a claim for it is waiting (REQ-024). */
+  deletePrize: (prizeId: string) => apiRequest<void>(`/prizes/${prizeId}`, { method: 'DELETE' }),
 
   listClaims: (
     options: ReadOptions = {},

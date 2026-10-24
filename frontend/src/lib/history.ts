@@ -218,3 +218,12 @@ export function cellLabel(cell: DayCell): string {
 export function cellTone(cell: DayCell): DayState | 'blank' {
   return cell.kind === 'state' ? cell.state : 'blank'
 }
+
+/**
+ * Whether a parent can add or take off a check-in on this day of a child's habit (REQ-014):
+ * any day with a "Done" or "Not yet" state, which only exist from `created_on` to today.
+ * Saved days (the API's 409) and archived habits (422, C23) stay as they are.
+ */
+export function correctable(habit: HabitRead, cell: DayCell): boolean {
+  return !habit.archived && cell.kind === 'state' && cell.state !== 'saved'
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../../api/endpoints'
+import { useActiveSession } from '../../auth/useSession'
 import { useResource, type LoadOptions } from '../../api/hooks'
 import type { HabitRead, MemberRead } from '../../api/types'
 import { Button } from '../../components/Button'
@@ -10,11 +11,11 @@ import { Notice } from '../../components/Notice'
 import { PeriodNav } from '../../components/PeriodNav'
 import { Segmented, type SegmentedOption } from '../../components/Segmented'
 import { copy } from '../../copy'
-import { familyDate } from '../../lib/dates'
+import { familyDate, formatShortDay } from '../../lib/dates'
 import { fetchRange, periodOf, type HistoryView, type Period } from '../../lib/history'
 import styles from './History.module.css'
 import { MonthView } from './MonthView'
-import { WeekView } from './WeekView'
+import { WeekView, type WeekCorrection } from './WeekView'
 
 interface Family {
   today: string
@@ -90,7 +91,7 @@ function HistoryBody({ today, members, habits }: Family) {
   }
 
   const shown = whose === EVERYONE ? members : members.filter((m) => m.id === whose)
-  const View = period.view === 'week' ? WeekView : MonthView
+  const correction = useCorrection(members, () => data.reload())
 
   return (
     <>
@@ -105,8 +106,31 @@ function HistoryBody({ today, members, habits }: Family) {
         <MemberFilter members={members} value={whose} onChange={setWhose} />
         <StateKey />
       </div>
-      {data.data ? (
-        <View
+      {correction.message && (
+        <Notice
+          tone={correction.message.tone}
+          icon={correction.message.tone === 'info' ? 'check' : 'info'}
+        >
+          {correction.message.text}
+        </Notice>
+      )}
+      {data.data && period.view === 'week' ? (
+        <>
+          {correction.week && shown.some(correction.week.canCorrect) && (
+            <p className={styles.hint}>{copy.correction.hint}</p>
+          )}
+          <WeekView
+            members={shown}
+            habits={habits}
+            checkIns={data.data.checkIns}
+            savers={data.data.savers}
+            period={period}
+            today={today}
+            correction={correction.week}
+          />
+        </>
+      ) : data.data ? (
+        <MonthView
           members={shown}
           habits={habits}
           checkIns={data.data.checkIns}
@@ -121,6 +145,48 @@ function HistoryBody({ today, members, habits }: Family) {
       )}
     </>
   )
+}
+
+type Message = { tone: 'info' | 'caution'; text: string } | null
+
+/**
+ * A parent's corrections to a child's past days in the week view (REQ-014): one at a time,
+ * then the period is read again, so streaks, week states and totals follow the server.
+ * Children (and parents looking at the other parent) get no correction at all.
+ */
+function useCorrection(members: MemberRead[], reload: () => Promise<void>) {
+  const me = useActiveSession()?.acting_member
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<Message>(null)
+
+  const onToggle = async (habit: HabitRead, day: string, done: boolean) => {
+    if (busy) return
+    setBusy(true)
+    setMessage(null)
+    const owner = members.find((m) => m.id === habit.member_id)
+    try {
+      await (done ? api.undoCheckIn(habit.id, day) : api.checkIn(habit.id, day))
+      const name = owner?.nickname ?? copy.approvals.aMember
+      setMessage({
+        tone: 'info',
+        text: copy.correction.done(name, habit.title, formatShortDay(day)),
+      })
+    } catch {
+      setMessage({ tone: 'caution', text: copy.correction.trouble })
+    }
+    await reload()
+    setBusy(false)
+  }
+
+  const week: WeekCorrection | undefined =
+    me?.role === 'parent'
+      ? {
+          canCorrect: (m) => m.role === 'child',
+          busy,
+          onToggle: (h, d, x) => void onToggle(h, d, x),
+        }
+      : undefined
+  return { week, message }
 }
 
 /** "Key: ✓ Done ★ Saved Not yet · Weekly habits: Week complete, Week saved" */

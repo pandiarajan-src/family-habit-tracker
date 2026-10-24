@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { CheckInRead, HabitRead, StreakSaverRead } from '../../api/types'
-import { boardRoutes, habit, kavi, mia, TODAY, weekly } from '../../test/fixtures'
+import { boardRoutes, dad, habit, kavi, mia, mum, TODAY, weekly } from '../../test/fixtures'
 import { json, mockApi, problem, type ApiCall, type Routes } from '../../test/mockApi'
 import { renderApp } from '../../test/renderWithProviders'
 
@@ -45,16 +45,16 @@ const SAVERS = [saver(reading, '2026-10-18'), saver(familyTime, '2026-10-12')]
 const inRange = (call: ApiCall, date: string) =>
   date >= call.query.get('from')! && date <= call.query.get('to')!
 
-function setup(routes: Routes = {}) {
+function setup(routes: Routes = {}, me = mia) {
   vi.useFakeTimers({ shouldAdvanceTime: true, now: TODAY })
   const api = mockApi({
-    ...boardRoutes(mia),
+    ...boardRoutes(me),
     'GET /habits': () => json(HABITS),
     'GET /check-ins': (call) => json(CHECK_INS.filter((c) => inRange(call, c.date))),
     'GET /streak-savers': (call) => json(SAVERS.filter((s) => inRange(call, s.period_start))),
     ...routes,
   })
-  const { user } = renderApp({ route: '/history' })
+  const { user } = renderApp({ route: '/history', fakeTimers: true })
   return { api, user }
 }
 
@@ -301,5 +301,101 @@ describe('History when the server can’t be reached', () => {
     await user.click(screen.getByRole('button', { name: 'Try again' }))
 
     expect(await screen.findByRole('region', { name: 'Kavi' })).toBeInTheDocument()
+  })
+})
+
+describe('REQ-014 a parent corrects a child’s day in History', () => {
+  const stretching = habit(dad, { title: 'Stretching' })
+
+  it("turns a child's Done and Not yet days into buttons, and nobody else's", async () => {
+    setup({ 'GET /habits': () => json([...HABITS, stretching]) }, mum)
+
+    const kaviCard = await screen.findByRole('region', { name: 'Kavi' })
+    expect(
+      within(kaviCard).getByRole('button', {
+        name: 'Mon 19 Oct: Done — take off the check-in for Tidy room',
+      }),
+    ).toBeEnabled()
+    expect(
+      within(kaviCard).getByRole('button', {
+        name: 'Tue 20 Oct: Not yet — add a check-in for Tidy room',
+      }),
+    ).toBeEnabled()
+    // Days still to come stay plain.
+    expect(within(kaviCard).getAllByRole('button')).toHaveLength(2)
+    // An archived habit (C23) and the other parent's habits can't be corrected.
+    expect(within(memberCard('Mia')).queryByRole('button', { name: /Drawing/ })).toBeNull()
+    expect(within(memberCard('Dad')).queryAllByRole('button')).toHaveLength(0)
+    expect(
+      screen.getByText(
+        'Tap a day on a child’s habit to add or take off a check-in. The child will see a note on My day.',
+      ),
+    ).toBeVisible()
+  })
+
+  it('a saved day stays as it is', async () => {
+    const { user } = setup({}, mum)
+    await screen.findByRole('region', { name: 'Mia' })
+    await user.click(screen.getByRole('button', { name: 'Previous week' }))
+
+    const miaCard = await screen.findByRole('region', { name: 'Mia' })
+    expect(
+      within(miaCard).getByRole('button', {
+        name: 'Sat 17 Oct: Done — take off the check-in for Reading',
+      }),
+    ).toBeEnabled()
+    expect(within(miaCard).queryByRole('button', { name: /Sun 18 Oct: Saved/ })).toBeNull()
+    expect(within(miaCard).getByRole('list', { name: /Reading/ })).toHaveTextContent('Saved')
+  })
+
+  it('adds and takes off check-ins, then reads the week again', async () => {
+    const { api, user } = setup(
+      {
+        [`PUT /habits/${tidy.id}/check-ins/2026-10-20`]: () =>
+          json(checkIn(tidy, '2026-10-20'), 201),
+        [`DELETE /habits/${tidy.id}/check-ins/2026-10-19`]: () =>
+          new Response(null, { status: 204 }),
+      },
+      mum,
+    )
+    const kaviCard = await screen.findByRole('region', { name: 'Kavi' })
+    const reads = api.callsTo('GET /check-ins').length
+
+    const today = within(kaviCard).getByRole('button', { name: /Tue 20 Oct: Not yet/ })
+    await user.click(today)
+    expect(
+      await screen.findByText(
+        'Kavi’s Tidy room for Tue 20 Oct is updated. Kavi will see a note on My day.',
+      ),
+    ).toBeVisible()
+    expect(api.callsTo(`PUT /habits/${tidy.id}/check-ins/2026-10-20`)).toHaveLength(1)
+    expect(api.callsTo('GET /check-ins').length).toBeGreaterThan(reads)
+
+    await user.click(within(kaviCard).getByRole('button', { name: /Mon 19 Oct: Done/ }))
+    expect(
+      await screen.findByText(
+        'Kavi’s Tidy room for Mon 19 Oct is updated. Kavi will see a note on My day.',
+      ),
+    ).toBeVisible()
+    expect(api.callsTo(`DELETE /habits/${tidy.id}/check-ins/2026-10-19`)).toHaveLength(1)
+  })
+
+  it('a refused correction says so kindly', async () => {
+    const { user } = setup(
+      { [`PUT /habits/${tidy.id}/check-ins/2026-10-20`]: () => problem(500) },
+      mum,
+    )
+    const kaviCard = await screen.findByRole('region', { name: 'Kavi' })
+    await user.click(within(kaviCard).getByRole('button', { name: /Tue 20 Oct: Not yet/ }))
+    expect(
+      await screen.findByText("We couldn't change that day just now. Please try again."),
+    ).toBeVisible()
+  })
+
+  it('a child sees no correction buttons', async () => {
+    setup()
+    const kaviCard = await screen.findByRole('region', { name: 'Kavi' })
+    expect(within(kaviCard).queryAllByRole('button')).toHaveLength(0)
+    expect(screen.queryByText(/Tap a day on a child’s habit/)).toBeNull()
   })
 })

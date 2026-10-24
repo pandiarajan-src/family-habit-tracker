@@ -1,10 +1,20 @@
 import type { CheckInRead, HabitRead, MemberRead, StreakSaverRead } from '../../api/types'
-import { DayChip } from '../../components/DayChip'
+import { DayChip, type DayCorrection } from '../../components/DayChip'
 import { WeekStateBadge } from '../../components/WeekStateBadge'
 import { copy } from '../../copy'
 import { formatShortDay } from '../../lib/dates'
 import { habitHistory, habitWeekState } from '../../lib/dayStates'
-import { dayCell, daysOf, habitsInPeriod, periodLabel, tally, type Period } from '../../lib/history'
+import {
+  cellLabel,
+  correctable,
+  dayCell,
+  daysOf,
+  habitsInPeriod,
+  periodLabel,
+  tally,
+  type DayCell,
+  type Period,
+} from '../../lib/history'
 import styles from './History.module.css'
 
 interface WeekViewProps {
@@ -14,6 +24,33 @@ interface WeekViewProps {
   savers: readonly StreakSaverRead[]
   period: Period
   today: string
+  /** Set for a parent: their children's days become buttons (REQ-014). */
+  correction?: WeekCorrection
+}
+
+export interface WeekCorrection {
+  /** Whose days this parent may correct: children only (REQ-014, REQ-028). */
+  canCorrect: (member: MemberRead) => boolean
+  busy: boolean
+  /** `done` is the day's state now, so the toggle takes the check-in off when it's true. */
+  onToggle: (habit: HabitRead, day: string, done: boolean) => void
+}
+
+function chipCorrection(
+  correction: WeekCorrection | undefined,
+  member: MemberRead,
+  habit: HabitRead,
+  day: string,
+  cell: DayCell,
+): DayCorrection | undefined {
+  if (!correction?.canCorrect(member) || !correctable(habit, cell)) return undefined
+  const done = cell.kind === 'state' && cell.state === 'done'
+  const describe = done ? copy.correction.remove : copy.correction.add
+  return {
+    name: describe(formatShortDay(day), cellLabel(cell), habit.title),
+    busy: correction.busy,
+    onToggle: () => correction.onToggle(habit, day, done),
+  }
 }
 
 /**
@@ -21,7 +58,15 @@ interface WeekViewProps {
  * and one week state for weekly habits (REQ-023, C13). From 640px of card width it's a
  * habit × day grid; narrower, each habit stacks its name above 7 wrapping chips (C12).
  */
-export function WeekView({ members, habits, checkIns, savers, period, today }: WeekViewProps) {
+export function WeekView({
+  members,
+  habits,
+  checkIns,
+  savers,
+  period,
+  today,
+  correction,
+}: WeekViewProps) {
   const days = daysOf(period)
   const label = periodLabel(period, today)
   return (
@@ -76,9 +121,17 @@ export function WeekView({ members, habits, checkIns, savers, period, today }: W
                         className={styles.chips}
                         aria-label={copy.history.habitDays(habit.title, label)}
                       >
-                        {days.map((day) => (
-                          <DayChip key={day} day={day} cell={dayCell(habit, history, day, today)} />
-                        ))}
+                        {days.map((day) => {
+                          const cell = dayCell(habit, history, day, today)
+                          return (
+                            <DayChip
+                              key={day}
+                              day={day}
+                              cell={cell}
+                              correction={chipCorrection(correction, member, habit, day, cell)}
+                            />
+                          )
+                        })}
                       </ul>
                     </div>
                   )
