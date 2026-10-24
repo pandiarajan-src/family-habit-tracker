@@ -59,19 +59,16 @@ describe('REQ-003 member screens need someone checking in', () => {
     expect(screen.getByLabelText('Current path')).toHaveTextContent(/^\/$/)
   })
 
-  it.each([
-    ['/gems', 'Gems & prizes'],
-    ['/habits', 'My habits'],
-    ['/habits/new', 'Edit habit'],
-    ['/habits/some-id', 'Edit habit'],
-    ['/my-pin', 'My PIN'],
-  ])('%s is registered for later phases', async (route, title) => {
-    mockApi(boardRoutes(mia))
-    renderApp({ route })
+  it.each([['/gems', 'Gems & prizes']])(
+    '%s is registered for later phases',
+    async (route, title) => {
+      mockApi(boardRoutes(mia))
+      renderApp({ route })
 
-    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument()
-    expect(screen.getByText('This screen is on its way')).toBeInTheDocument()
-  })
+      expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument()
+      expect(screen.getByText('This screen is on its way')).toBeInTheDocument()
+    },
+  )
 })
 
 describe('REQ-028 app header and tabs', () => {

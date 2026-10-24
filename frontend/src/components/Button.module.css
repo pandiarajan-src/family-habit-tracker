@@ -60,6 +60,17 @@
   color: var(--on-sun);
 }
 
+.danger {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+
+.dangerOutline {
+  background: var(--surface-raised);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
 .quiet:hover {
   background: var(--teal-soft);
 }

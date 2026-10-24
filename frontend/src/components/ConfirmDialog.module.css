@@ -1,0 +1,22 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+}
+
+.title {
+  font: 800 20px/28px var(--font-sans);
+}
+
+.text {
+  font: 500 16px/24px var(--font-sans);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

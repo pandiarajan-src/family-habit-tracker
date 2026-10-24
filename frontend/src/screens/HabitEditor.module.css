@@ -1,0 +1,44 @@
+.back {
+  align-self: center;
+}
+
+/* One centred card, fluid up to a comfortable reading width [family-ux #1]. */
+.card {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: var(--space-6) clamp(16px, 5vw, 40px);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--teal);
+  background: var(--surface-raised);
+}
+
+.heading {
+  font: 800 28px/36px var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fixed {
+  font: 700 16px/24px var(--font-sans);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.manage {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
