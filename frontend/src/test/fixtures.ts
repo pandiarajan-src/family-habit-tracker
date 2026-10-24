@@ -109,5 +109,9 @@ export function boardRoutes(acting: MemberRead | null = null): Routes {
     'GET /adjustments': () => json([]),
     'GET /check-ins': () => json([]),
     'GET /streak-savers': () => json([]),
+    // So are Gems & prizes' reads, for tests that move between tabs.
+    'GET /prizes': () => json([]),
+    'GET /prize-claims': () => json([]),
+    ...(acting && { [`GET /members/${acting.id}/gem-transactions`]: () => json([]) }),
   }
 }

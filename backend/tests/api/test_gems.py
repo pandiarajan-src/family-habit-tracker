@@ -1,6 +1,7 @@
 """REQ-018/019 earned gems, REQ-021 balance and history, REQ-014 write-offs after corrections."""
 
 from collections.abc import Callable
+from datetime import timedelta
 from uuid import uuid4
 
 import pytest
@@ -18,6 +19,7 @@ from tests.support import (
     create_prize,
     csrf,
     d,
+    decide,
     delete_check_in,
     gems,
     habit_path,
@@ -140,6 +142,27 @@ def test_req_021_history_lists_derived_earnings_spends_and_holds_newest_first(
     assert hold["prize_claim_id"] is not None
     earned = next(e for e in events if e["kind"] == "daily_checkin")
     assert earned["habit_id"] == str(habit)
+
+
+@pytest.mark.req("REQ-021")
+def test_req_021_same_day_spends_are_newest_first(
+    as_parent: TestClient, family: SeededFamily, seed: Seeder, clock
+) -> None:
+    mia = family["Mia"]
+    seed.habit(mia, "Reading", done=_days(-6, 0))  # 19 gems
+    first = create_prize(as_parent, "Ice cream", 4).json()["id"]
+    second = create_prize(as_parent, "Cinema trip", 5).json()["id"]
+    act_as(as_parent, mia)
+    held = claim(as_parent, first).json()["id"]
+    clock.advance(timedelta(minutes=1))
+    decide(as_parent, held, "cancelled")
+    clock.advance(timedelta(minutes=1))
+    claim(as_parent, second)
+
+    events = [(e["kind"], e["amount"]) for e in _history(as_parent, mia) if e["date"] == str(TODAY)]
+    # Earnings come first on a day; then the ledger rows, latest first.
+    assert events[0][0] == "daily_checkin"
+    assert events[-3:] == [("prize_hold", -5), ("prize_release", 4), ("prize_hold", -4)]
 
 
 @pytest.mark.req("REQ-021")

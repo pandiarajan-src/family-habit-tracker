@@ -122,29 +122,52 @@ export interface ChangeNotice {
   text: string
 }
 
+export interface ChangeLine extends ChangeNotice {
+  /** The parent's avatar, or null once they're removed. */
+  actorEmoji: string | null
+  /** The family date the change was made ("Mon 19 Oct"). */
+  madeOn: string
+  acknowledged: boolean
+}
+
 /**
- * Parent-change notices for My day (REQ-015): the ones not yet dismissed, newest first.
- * The API sends IDs only, so nicknames and titles come from members and habits already loaded.
+ * Every change a parent made, newest first (REQ-015). The API sends IDs only, so nicknames
+ * and titles come from members and habits already loaded.
  */
+export function describeChanges(
+  adjustments: AdjustmentRead[],
+  members: MemberRead[],
+  habits: HabitRead[],
+  timeZone: string,
+): ChangeLine[] {
+  const byId = new Map(members.map((m) => [m.id, m]))
+  const title = new Map(habits.map((h) => [h.id, h.title]))
+  return [...adjustments]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+    .map((a) => {
+      const actor = a.actor_member_id ? byId.get(a.actor_member_id) : undefined
+      const who = actor?.nickname ?? copy.changes.someone
+      const habit = (a.habit_id && title.get(a.habit_id)) || copy.changes.aHabit
+      const madeOn = familyDate(Date.parse(a.created_at), timeZone)
+      return {
+        id: a.id,
+        title: copy.changes.title[a.kind](who, habit, formatShortDay(a.date ?? madeOn)),
+        text: copy.changes.text[a.kind],
+        actorEmoji: actor?.avatar_emoji ?? null,
+        madeOn: formatShortDay(madeOn),
+        acknowledged: a.acknowledged_at !== null,
+      }
+    })
+}
+
+/** My day's notices: the changes not yet dismissed with "Got it", newest first. */
 export function changeNotices(
   adjustments: AdjustmentRead[],
   members: MemberRead[],
   habits: HabitRead[],
   timeZone: string,
 ): ChangeNotice[] {
-  const nickname = new Map(members.map((m) => [m.id, m.nickname]))
-  const title = new Map(habits.map((h) => [h.id, h.title]))
-  return adjustments
-    .filter((a) => a.acknowledged_at === null)
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-    .map((a) => {
-      const who = (a.actor_member_id && nickname.get(a.actor_member_id)) || copy.changes.someone
-      const habit = (a.habit_id && title.get(a.habit_id)) || copy.changes.aHabit
-      const day = formatShortDay(a.date ?? familyDate(Date.parse(a.created_at), timeZone))
-      return {
-        id: a.id,
-        title: copy.changes.title[a.kind](who, habit, day),
-        text: copy.changes.text[a.kind],
-      }
-    })
+  return describeChanges(adjustments, members, habits, timeZone)
+    .filter((line) => !line.acknowledged)
+    .map(({ id, title, text }) => ({ id, title, text }))
 }

@@ -1,0 +1,15 @@
+.balance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: 800 32px/40px var(--font-sans);
+}
+
+.held {
+  font: 600 16px/22px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.text {
+  font: 500 16px/24px var(--font-sans);
+}
